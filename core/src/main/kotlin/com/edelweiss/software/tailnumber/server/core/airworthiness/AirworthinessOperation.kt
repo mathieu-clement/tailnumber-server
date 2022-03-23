@@ -1,0 +1,47 @@
+package com.edelweiss.software.tailnumber.server.core.airworthiness
+
+import com.edelweiss.software.tailnumber.server.core.airworthiness.AirworthinessCertificateClass.*
+
+interface AirworthinessOperation {
+    // Members are same as enum
+    val name: String
+    val ordinal: Int
+
+    fun fromFaaCode(code: String, certificateClass: AirworthinessCertificateClass): List<AirworthinessOperation> =
+        if (code.isEmpty()) emptyList()
+        else
+            code.trim().let { code ->
+                when (certificateClass) {
+                    STANDARD -> StandardAirworthinessOperation.fromFaaCode(code[0]).toList()
+                    LIMITED -> emptyList()
+                    RESTRICTED -> RestrictedAirworthinessOperation.fromFaaCodes(code)
+                    EXPERIMENTAL -> ExperimentalAirworthinessOperation.fromFaaCodes(code)
+                    PROVISIONAL -> ProvisionalAirworthinessOperation.fromFaaCode(code.toInt()).toList()
+                    MULTIPLE -> fromMultiple(code)
+                    PRIMARY -> emptyList()
+                    SPECIAL_FLIGHT_PERMIT -> SpecialFlightPermitAirworthinessOperation.fromFaaCodes(code)
+                    LIGHT_SPORT -> LightSportAirworthinessOperation.fromFaaCode(code[0]).toList()
+                }
+            }
+
+    fun fromMultiple(code: String): MutableList<AirworthinessOperation> {
+        val trimmed = code.trim()
+        if (code.length < 2) emptyList<AirworthinessOperation>()
+
+        val output: MutableList<AirworthinessOperation> = trimmed.substring(0, 2)
+            .toCharArray()
+            .map { it.digitToInt() }
+            .mapNotNull { AirworthinessCertificateClass.fromFaaCode(it) }
+            .toMutableList()
+
+        if (code.length > 2) {
+            output += MultipleAirworthinessOperation.fromFaaCodes(trimmed.substring(2))
+        }
+
+        return output
+    }
+
+    fun AirworthinessOperation?.toList(): List<AirworthinessOperation> =
+        if (this == null) emptyList()
+        else listOf(this)
+}

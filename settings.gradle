@@ -1,0 +1,5 @@
+rootProject.name = 'tailnumber-server'
+include 'core'
+include 'common'
+include 'registries'
+

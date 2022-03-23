@@ -1,0 +1,3 @@
+package com.edelweiss.software.tailnumber.server.core.airworthiness
+
+typealias MultipleAirworthinessOperation = RestrictedAirworthinessOperation

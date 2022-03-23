@@ -1,0 +1,11 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+group 'com.edelweiss.software.tailnumber.server'
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.natpryce:konfig:1.6.10.0'
+}

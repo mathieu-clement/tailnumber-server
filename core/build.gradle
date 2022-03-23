@@ -1,0 +1,14 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+group 'com.edelweiss.software.tailnumber.server'
+
+dependencies {
+    implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    implementation project(':common')
+}
+
+test {
+    useJUnitPlatform()
+}
