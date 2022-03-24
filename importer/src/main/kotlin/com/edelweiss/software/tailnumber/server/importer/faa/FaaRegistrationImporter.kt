@@ -8,6 +8,7 @@ import com.edelweiss.software.tailnumber.server.core.airworthiness.Airworthiness
 import com.edelweiss.software.tailnumber.server.core.airworthiness.AirworthinessOperation
 import com.edelweiss.software.tailnumber.server.core.engine.*
 import com.edelweiss.software.tailnumber.server.core.registration.*
+import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.acftref.AcftRefImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.acftref.AcftRefRecord
@@ -15,6 +16,9 @@ import com.edelweiss.software.tailnumber.server.importer.faa.engine.EngineImport
 import com.edelweiss.software.tailnumber.server.importer.faa.engine.EngineRecord
 import com.edelweiss.software.tailnumber.server.importer.faa.master.MasterImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.master.MasterRecord
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -193,11 +197,18 @@ class FaaRegistrationImporter(
 fun main(args: Array<String>) {
     val basePath = args[0]
     val importer = FaaRegistrationImporter(basePath)
-    /*
-    importer.import().first {
+
+    val n12234 = importer.import().first {
         it.registrationId.id == "N12234"
-    }.let {
-        println(it)
     }
-     */
+
+    val json = Json {
+        prettyPrint = true
+        serializersModule = CoreSerialization.serializersModule
+        }
+    val str = json.encodeToString(n12234)
+    println(str)
+
+    val reg = json.decodeFromString<Registration>(str)
+    println(reg)
 }

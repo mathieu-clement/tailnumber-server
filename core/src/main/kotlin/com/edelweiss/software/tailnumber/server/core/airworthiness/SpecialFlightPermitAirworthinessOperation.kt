@@ -1,7 +1,9 @@
 package com.edelweiss.software.tailnumber.server.core.airworthiness
 
+import kotlinx.serialization.Serializable
 import org.slf4j.LoggerFactory
 
+@Serializable
 enum class SpecialFlightPermitAirworthinessOperation : AirworthinessOperation {
     FERRY_FLIGHT_FOR_REPAIRS_ALTERATIONS_MAINTENANCE_OR_STORAGE,
     EVACUATE_FROM_AREA_OF_IMPENDING_DANGER,

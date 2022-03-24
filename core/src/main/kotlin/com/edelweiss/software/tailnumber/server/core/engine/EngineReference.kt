@@ -1,9 +1,12 @@
 package com.edelweiss.software.tailnumber.server.core.engine
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class EngineReference(
-    val engineType: EngineType?,
+    val engineType: EngineType? = null,
     val manufacturer: String,
     val model: String,
-    val power: Power?,
-    val thrust: Thrust?,
+    val power: Power? = null,
+    val thrust: Thrust? = null
 )

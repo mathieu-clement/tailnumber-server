@@ -1,21 +1,24 @@
 package com.edelweiss.software.tailnumber.server.core.engine
 
-import com.edelweiss.software.tailnumber.server.core.engine.ThrustUnit.*
+import com.edelweiss.software.tailnumber.server.core.engine.ThrustUnit.NEWTONS
+import com.edelweiss.software.tailnumber.server.core.engine.ThrustUnit.POUNDS
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Thrust(
     val value: Int,
     val unit: ThrustUnit
 ) {
     private companion object {
-        val NEWTONS_PER_POUND = 4.45
+        private const val NEWTONS_PER_POUND = 4.45
     }
 
-    fun toPounds() : Int = when(unit) {
+    fun pounds() : Int = when(unit) {
         POUNDS -> value
         NEWTONS -> (NEWTONS_PER_POUND * value).toInt()
     }
 
-    fun toNewtons(): Int = when (unit) {
+    fun newtons(): Int = when (unit) {
         NEWTONS -> value
         POUNDS -> (value / NEWTONS_PER_POUND).toInt()
     }

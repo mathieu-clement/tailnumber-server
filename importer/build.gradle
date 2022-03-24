@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
 }
 
 group 'com.edelweiss.software.tailnumber.server'
@@ -7,6 +8,10 @@ group 'com.edelweiss.software.tailnumber.server'
 dependencies {
     implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
     implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2'
+    implementation "com.datastax.oss:java-driver-core:$datastax_version"
+    implementation "com.datastax.oss:java-driver-query-builder:$datastax_version"
+    implementation "com.datastax.oss:java-driver-mapper-runtime:$datastax_version"
     implementation project(':common')
     implementation project(':core')
 }

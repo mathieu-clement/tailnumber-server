@@ -1,17 +1,20 @@
 package com.edelweiss.software.tailnumber.server.core.aircraft
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class AircraftReference(
-    val aircraftType: AircraftType?,
-    val aircraftCategory: AircraftCategory?,
-    val manufacturer: String?,
-    val model: String?,
+    val aircraftType: AircraftType? = null,
+    val aircraftCategory: AircraftCategory? = null,
+    val manufacturer: String? = null,
+    val model: String? = null,
     val typeCertificated: Boolean,
-    val engines: Int?,
-    val seats: Int?,
-    val weightCategory: WeightCategory?,
-    val cruisingSpeed: Speed?,
-    val numberOfSeats: Int?,
-    val manufactureYear: Int?,
-    val kitManufacturerName: String?,
-    val kitModelName: String?
+    val engines: Int? = null,
+    val seats: Int? = null,
+    val weightCategory: WeightCategory? = null,
+    val cruisingSpeed: Speed? = null,
+    val numberOfSeats: Int? = null,
+    val manufactureYear: Int? = null,
+    val kitManufacturerName: String? = null,
+    val kitModelName: String? = null
     )

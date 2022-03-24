@@ -1,7 +1,9 @@
 package com.edelweiss.software.tailnumber.server.core.airworthiness
 
+import kotlinx.serialization.Serializable
 import org.slf4j.LoggerFactory
 
+@Serializable
 enum class ExperimentalAirworthinessOperation : AirworthinessOperation {
     TO_SHOW_COMPLIANCE_WITH_FAR,
     RESEARCH_AND_DEVELOPMENT,

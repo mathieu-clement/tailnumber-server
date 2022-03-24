@@ -1,7 +1,9 @@
 package com.edelweiss.software.tailnumber.server.core.airworthiness
 
+import kotlinx.serialization.Serializable
 import org.slf4j.LoggerFactory
 
+@Serializable
 enum class StandardAirworthinessOperation : AirworthinessOperation {
     NORMAL,
     UTILITY,

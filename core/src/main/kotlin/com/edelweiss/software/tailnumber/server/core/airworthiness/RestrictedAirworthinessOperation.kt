@@ -1,7 +1,9 @@
 package com.edelweiss.software.tailnumber.server.core.airworthiness
 
+import kotlinx.serialization.Serializable
 import org.slf4j.LoggerFactory
 
+@Serializable
 enum class RestrictedAirworthinessOperation : AirworthinessOperation {
     OTHER,
     AGRICULTURE_AND_PEST_CONTROL,

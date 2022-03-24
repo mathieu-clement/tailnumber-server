@@ -2,6 +2,9 @@ package com.edelweiss.software.tailnumber.server.core.registration
 
 import com.edelweiss.software.tailnumber.server.core.Country
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class RegistrationId(
     val id: String,
     val country: Country

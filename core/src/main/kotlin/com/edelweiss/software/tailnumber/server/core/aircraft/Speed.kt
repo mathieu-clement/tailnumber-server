@@ -2,6 +2,9 @@ package com.edelweiss.software.tailnumber.server.core.aircraft
 
 import com.edelweiss.software.tailnumber.server.core.aircraft.SpeedUnit.*
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Speed(
     val value: Int,
     val unit: SpeedUnit

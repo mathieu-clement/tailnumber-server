@@ -1,15 +1,17 @@
 package com.edelweiss.software.tailnumber.server.core.engine
 
 import com.edelweiss.software.tailnumber.server.core.engine.PowerUnit.*
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Power(
     val value: Int,
     val unit: PowerUnit
 ) {
     private companion object {
-        val SAE_TO_METRIC_HP = 1.014
-        val METRIC_HP_TO_WATTS = 735.5
-        val SAE_HP_TO_WATTS = 745.7
+        const val SAE_TO_METRIC_HP = 1.014
+        const val METRIC_HP_TO_WATTS = 735.5
+        const val SAE_HP_TO_WATTS = 745.7
     }
 
     fun toMetricHP() : Int = when (unit) {
