@@ -133,11 +133,9 @@ class FaaRegistrationImporter(
         zipCode: String?,
         state: String?,
         country: String?
-    ): Registrant? {
-        val address = parseAddress(street, street2, city, zipCode, state, country)
-        if (name == null && address == null) return null
-        else return Registrant(name, address)
-    }
+    ): Registrant? =
+        Registrant(name, parseAddress(street, street2, city, zipCode, state, country))
+            .takeIf { it.address != null && it.name != null }
 
     private fun parseAddress(
         street: String?,
@@ -153,10 +151,10 @@ class FaaRegistrationImporter(
             country)
     }
 
-    private fun parseUsZipCode(zipCode: String?): String? {
-        if (zipCode == null) return null
-        if (zipCode.length < 6) return zipCode
-        return zipCode.substring(0, 5) + "-" + zipCode.substring(5)
+    private fun parseUsZipCode(zipCode: String?): String? = when {
+        zipCode == null -> null
+        zipCode.length < 6 -> zipCode
+        else -> zipCode.substring(0, 5) + "-" + zipCode.substring(5)
     }
 
     private fun parseAirworthiness(certification: String?, airWorthDate: String?): Airworthiness? {
@@ -173,8 +171,9 @@ class FaaRegistrationImporter(
         }
         val airworthinessDate = parseDate(airWorthDate)
         @Suppress("KotlinConstantConditions")
-        if (airworthinessDate == null && certificateClass == null && operation.isEmpty()) return null
-        else return Airworthiness(certificateClass, operation, airworthinessDate)
+        return Airworthiness(certificateClass, operation, airworthinessDate).takeIf {
+            airworthinessDate != null && certificateClass != null && operation.isNotEmpty()
+        }
     }
 
     private fun parseCoOwners(name1: String?, name2: String?, name3: String?, name4: String?, name5: String?): List<String> {
