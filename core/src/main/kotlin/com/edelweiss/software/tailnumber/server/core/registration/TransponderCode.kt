@@ -10,4 +10,6 @@ data class TransponderCode(val code: Long) {
     fun hex() = code.toString(16).uppercase()
 
     fun octal() = code.toString(8)
+
+    override fun toString(): String = "octal=${octal()}, hex=${hex()}"
 }

@@ -1,4 +1,4 @@
-package com.edelweiss.software.tailnumber.server.importer.faa
+package com.edelweiss.software.tailnumber.server.importer.faa.acftref
 
 data class AcftRefRecord(
     val code: String,

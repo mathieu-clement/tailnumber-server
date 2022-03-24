@@ -1,6 +1,7 @@
-package com.edelweiss.software.tailnumber.server.core.registration
+package com.edelweiss.software.tailnumber.server.core.aircraft
 
-import com.edelweiss.software.tailnumber.server.core.registration.WeightUnit.*
+import com.edelweiss.software.tailnumber.server.core.aircraft.WeightUnit.KILOGRAMS
+import com.edelweiss.software.tailnumber.server.core.aircraft.WeightUnit.US_POUNDS
 
 data class Weight(
     val value: Int,

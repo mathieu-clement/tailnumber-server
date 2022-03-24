@@ -16,6 +16,7 @@ enum class ExperimentalAirworthinessOperation : AirworthinessOperation {
     OPERATING_LIGHT_SPORT_21_190,
     UNMANNED_AIRCRAFT_RESEARCH_AND_DEVELOPMENT,
     UNMANNED_AIRCRAFT_CREW_TRAINING,
+    UNMANNED_AIRCRAFT_MARKET_SURVEY,
     UNMANNED_AIRCRAFT_EXHIBITION,
     UNMANNED_AIRCRAFT_COMPLIANCE_WITH_CFR
     ;
@@ -62,9 +63,10 @@ enum class ExperimentalAirworthinessOperation : AirworthinessOperation {
             "8B" -> OPERATING_LIGHT_SPORT_KIT_BUILT
             "8C" -> OPERATING_LIGHT_SPORT_21_190
             "9A" -> UNMANNED_AIRCRAFT_RESEARCH_AND_DEVELOPMENT
-            "9B" -> UNMANNED_AIRCRAFT_CREW_TRAINING
-            "9C" -> UNMANNED_AIRCRAFT_EXHIBITION
-            "9D" -> UNMANNED_AIRCRAFT_COMPLIANCE_WITH_CFR
+            "9B" -> UNMANNED_AIRCRAFT_MARKET_SURVEY
+            "9C" -> UNMANNED_AIRCRAFT_CREW_TRAINING
+            "9D" -> UNMANNED_AIRCRAFT_EXHIBITION
+            "9E" -> UNMANNED_AIRCRAFT_COMPLIANCE_WITH_CFR
             else -> {
                 logger.warn("Unknown experimental airworthiness operation: $code")
                 null

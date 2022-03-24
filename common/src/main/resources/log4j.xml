@@ -8,9 +8,9 @@
         </layout>
     </appender>
 
-<!--    <logger name="com.edelweiss.software.peagemalin.lib.data.repositories.tarifs">-->
-<!--        <level value="ERROR"/>-->
-<!--    </logger>-->
+    <logger name="com.edelweiss.software.tailnumber.server.importer">
+        <level value="INFO"/>
+    </logger>
 
     <root>
         <priority value="info"/>

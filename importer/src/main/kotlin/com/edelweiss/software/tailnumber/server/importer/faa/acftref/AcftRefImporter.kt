@@ -1,9 +1,9 @@
-package com.edelweiss.software.tailnumber.server.importer.faa
+package com.edelweiss.software.tailnumber.server.importer.faa.acftref
 
 import com.edelweiss.software.tailnumber.server.importer.csv.CsvParser
 
-class AcftRefImporter(val filename: String) {
-    val parser = CsvParser(filename, isExternalFile = true, quoteChar = null)
+class AcftRefImporter(filename: String) {
+    private val parser = CsvParser(filename, isExternalFile = true, quoteChar = null)
 
     fun import(): List<AcftRefRecord> =
         parser.table().drop(1) // skip header

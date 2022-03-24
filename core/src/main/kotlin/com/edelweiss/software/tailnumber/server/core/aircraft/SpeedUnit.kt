@@ -1,4 +1,5 @@
 package com.edelweiss.software.tailnumber.server.core.aircraft
 
-enum class CertificationType {
+enum class SpeedUnit {
+    KT, MPH, KPH
 }
