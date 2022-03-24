@@ -87,7 +87,7 @@ class FaaRegistrationImporter(
                 engines = acftRefRecord?.noEng,
                 seats = acftRefRecord?.noSeats,
                 weightCategory = acftRefRecord?.let { WeightCategory.fromFaaCode(it.acWeight) },
-                cruisingSpeed = acftRefRecord?.speed?.let { Speed(it, SpeedUnit.MPH) },
+                cruisingSpeed = acftRefRecord?.speed?.let { Speed(it, SpeedUnit.MPH) }.takeIf { it?.value != 0 },
                 numberOfSeats = acftRefRecord?.noSeats,
                 manufactureYear = masterRecord.yearMfr,
                 kitManufacturerName = masterRecord.kitMfr,
