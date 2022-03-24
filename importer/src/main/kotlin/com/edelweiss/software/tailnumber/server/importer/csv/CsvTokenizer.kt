@@ -1,8 +1,8 @@
-package com.edelweiss.software.tailnumber.server.common.csv
+package com.edelweiss.software.tailnumber.server.importer.csv
 
 class CsvTokenizer(private val line: String,
                    private val delimiter: Char,
-                   private val quoteChar : Char) {
+                   private val quoteChar : Char?) {
     private var left = 0
     private var right = 0
     private var insideQuotes = false

@@ -10,17 +10,17 @@ interface AirworthinessOperation {
     fun fromFaaCode(code: String, certificateClass: AirworthinessCertificateClass): List<AirworthinessOperation> =
         if (code.isEmpty()) emptyList()
         else
-            code.trim().let { code ->
+            code.trim().let { trimmedCode ->
                 when (certificateClass) {
-                    STANDARD -> StandardAirworthinessOperation.fromFaaCode(code[0]).toList()
+                    STANDARD -> StandardAirworthinessOperation.fromFaaCode(trimmedCode[0]).toList()
                     LIMITED -> emptyList()
-                    RESTRICTED -> RestrictedAirworthinessOperation.fromFaaCodes(code)
-                    EXPERIMENTAL -> ExperimentalAirworthinessOperation.fromFaaCodes(code)
-                    PROVISIONAL -> ProvisionalAirworthinessOperation.fromFaaCode(code.toInt()).toList()
-                    MULTIPLE -> fromMultiple(code)
+                    RESTRICTED -> RestrictedAirworthinessOperation.fromFaaCodes(trimmedCode)
+                    EXPERIMENTAL -> ExperimentalAirworthinessOperation.fromFaaCodes(trimmedCode)
+                    PROVISIONAL -> ProvisionalAirworthinessOperation.fromFaaCode(trimmedCode.toInt()).toList()
+                    MULTIPLE -> fromMultiple(trimmedCode)
                     PRIMARY -> emptyList()
-                    SPECIAL_FLIGHT_PERMIT -> SpecialFlightPermitAirworthinessOperation.fromFaaCodes(code)
-                    LIGHT_SPORT -> LightSportAirworthinessOperation.fromFaaCode(code[0]).toList()
+                    SPECIAL_FLIGHT_PERMIT -> SpecialFlightPermitAirworthinessOperation.fromFaaCodes(trimmedCode)
+                    LIGHT_SPORT -> LightSportAirworthinessOperation.fromFaaCode(trimmedCode[0]).toList()
                 }
             }
 
