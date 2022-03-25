@@ -1,8 +1,12 @@
 package com.edelweiss.software.tailnumber.server.api.plugins
 
+import com.edelweiss.software.tailnumber.server.core.aircraft.WeightCategory
 import com.edelweiss.software.tailnumber.server.core.airworthiness.*
+import com.edelweiss.software.tailnumber.server.core.registration.TransponderCode
 import com.edelweiss.software.tailnumber.server.core.serializers.LocalDateSerializer
 import com.edelweiss.software.tailnumber.server.core.serializers.PolymorphicEnumSerializer
+import com.edelweiss.software.tailnumber.server.core.serializers.TransponderCodeSerializer
+import com.edelweiss.software.tailnumber.server.core.serializers.WeightCategorySerializer
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.serialization.*
@@ -17,6 +21,8 @@ fun Application.configureSerialization() {
             prettyPrint = true
             serializersModule = SerializersModule {
                 contextual(LocalDate::class) { LocalDateSerializer }
+                contextual(WeightCategory::class) { WeightCategorySerializer }
+                contextual(TransponderCode::class) { TransponderCodeSerializer }
                 polymorphic(AirworthinessOperation::class) {
                     subclass(
                         AirworthinessCertificateClass::class,

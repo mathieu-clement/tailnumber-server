@@ -1,5 +1,6 @@
 package com.edelweiss.software.tailnumber.server.core.aircraft
 
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,6 +12,7 @@ data class AircraftReference(
     val typeCertificated: Boolean,
     val engines: Int? = null,
     val seats: Int? = null,
+    @Contextual
     val weightCategory: WeightCategory? = null,
     val cruisingSpeed: Speed? = null,
     val numberOfSeats: Int? = null,

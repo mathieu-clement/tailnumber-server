@@ -2,11 +2,12 @@ package com.edelweiss.software.tailnumber.server.core.aircraft
 
 import org.slf4j.LoggerFactory
 
-enum class WeightCategory(val min: Int, val max: Int?) {
-    CLASS1(0, 12499),
-    CLASS2(12500, 19999),
-    CLASS3(20000, null),
-    UAV(0, 55) // Unmanned aerial vehicle AKA drone
+@kotlinx.serialization.Serializable
+enum class WeightCategory(val minWeight: Weight, val maxWeight: Weight?) {
+    CLASS1(0.lbs(), 12499.lbs()),
+    CLASS2(12500.lbs(), 19999.lbs()),
+    CLASS3(20000.lbs(), null),
+    UAV(0.lbs(), 55.lbs()) // Unmanned aerial vehicle AKA drone
     ;
 
     companion object {

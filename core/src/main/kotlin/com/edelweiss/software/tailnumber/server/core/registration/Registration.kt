@@ -24,7 +24,8 @@ data class Registration(
     @Contextual
     val expirationDate: LocalDate? = null,
     val airworthiness: Airworthiness? = null,
+    @Contextual
     val transponderCode: TransponderCode,
-    val fractionalOwnership: Boolean,
+    val fractionalOwnership: Boolean = false,
     val coOwners: List<String> = emptyList(),
     )

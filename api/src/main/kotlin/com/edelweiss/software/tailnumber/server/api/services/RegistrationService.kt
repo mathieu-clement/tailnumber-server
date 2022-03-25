@@ -8,5 +8,6 @@ class RegistrationService : KoinComponent {
 
     private val registrationRepository by inject<RegistrationRepository>()
 
+    // TODO client needs to automatically convert to uppercase and remove/not allow symbols and stuff, only A-Z1-9
     fun findByTailNumber(tailNumber: String) = registrationRepository.findByRegistrationId(tailNumber)
 }
