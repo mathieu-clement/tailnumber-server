@@ -29,11 +29,7 @@ class CassandraExporter(val importer: RegistrationImporter) {
     private val cassandraDataCenter = Config.getString("cassandra.datacenter")
 
     fun export() {
-        CqlSession.builder()
-            .withKeyspace(cassandraKeyspace)
-            .addContactPoint(InetSocketAddress(cassandraHost, cassandraPort))
-            .withLocalDatacenter(cassandraDataCenter)
-            .build().use { session ->
+        createSession().use { session ->
 //                https://docs.datastax.com/en/developer/java-driver/4.13/manual/core/statements/batch/
 
                 val preparedInsert: PreparedStatement = session.prepare(
@@ -76,6 +72,12 @@ class CassandraExporter(val importer: RegistrationImporter) {
                  */
             }
     }
+
+    private fun createSession() = CqlSession.builder()
+        .withKeyspace(cassandraKeyspace)
+        .addContactPoint(InetSocketAddress(cassandraHost, cassandraPort))
+        .withLocalDatacenter(cassandraDataCenter)
+        .build()
 }
 
 fun main(args: Array<String>) {

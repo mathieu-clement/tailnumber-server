@@ -1,6 +1,7 @@
 package com.edelweiss.software.tailnumber.server.core.registration
 
 import com.edelweiss.software.tailnumber.server.core.Country
+import com.edelweiss.software.tailnumber.server.core.exceptions.CountryNotFoundException
 
 import kotlinx.serialization.Serializable
 
@@ -19,7 +20,9 @@ data class RegistrationId(
             else if (rawId.startsWith("HB")) {
                 return RegistrationId(sanitizedId, Country.CH)
             }
-            throw IllegalArgumentException("Unknown registration country")
+            throw CountryNotFoundException(rawId)
         }
     }
+
+    override fun toString() = "$id (${country.name})"
 }

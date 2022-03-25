@@ -3,4 +3,5 @@ include 'core'
 include 'common'
 include 'registries'
 include 'importer'
+include 'api'
 

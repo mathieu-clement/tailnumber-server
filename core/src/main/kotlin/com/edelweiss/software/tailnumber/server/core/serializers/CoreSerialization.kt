@@ -11,34 +11,34 @@ object CoreSerialization {
         polymorphic(AirworthinessOperation::class) {
             subclass(
                 AirworthinessCertificateClass::class,
-                PolymorphicEnumSerializer(AirworthinessCertificateClass.serializer())
+                PolymorphicEnumSerializer(AirworthinessCertificateClass.serializer(), true)
             )
             subclass(
                 StandardAirworthinessOperation::class,
-                PolymorphicEnumSerializer(StandardAirworthinessOperation.serializer())
+                PolymorphicEnumSerializer(StandardAirworthinessOperation.serializer(), true)
             )
             subclass(
                 RestrictedAirworthinessOperation::class,
-                PolymorphicEnumSerializer(RestrictedAirworthinessOperation.serializer())
+                PolymorphicEnumSerializer(RestrictedAirworthinessOperation.serializer(), true)
             )
             subclass(
                 ExperimentalAirworthinessOperation::class, PolymorphicEnumSerializer(
-                    ExperimentalAirworthinessOperation.serializer()
+                    ExperimentalAirworthinessOperation.serializer(), true
                 )
             )
             subclass(
                 ProvisionalAirworthinessOperation::class, PolymorphicEnumSerializer(
-                    ProvisionalAirworthinessOperation.serializer()
+                    ProvisionalAirworthinessOperation.serializer(), true
                 )
             )
             subclass(
                 SpecialFlightPermitAirworthinessOperation::class, PolymorphicEnumSerializer(
-                    SpecialFlightPermitAirworthinessOperation.serializer()
+                    SpecialFlightPermitAirworthinessOperation.serializer(), true
                 )
             )
             subclass(
                 LightSportAirworthinessOperation::class,
-                PolymorphicEnumSerializer(LightSportAirworthinessOperation.serializer())
+                PolymorphicEnumSerializer(LightSportAirworthinessOperation.serializer(), true)
             )
         }
     }
