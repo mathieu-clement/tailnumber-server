@@ -16,6 +16,7 @@ val logger = LoggerFactory.getLogger("com.edelweiss.software.tailnumber.server.a
 
 fun Application.configureRouting() {
     install(IgnoreTrailingSlash)
+    install(AutoHeadResponse)
 
     val registrationService by inject<RegistrationService>()
 
