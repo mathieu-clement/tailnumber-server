@@ -4,6 +4,7 @@ import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.core.cql.BatchStatement
 import com.datastax.oss.driver.api.core.cql.DefaultBatchType
 import com.datastax.oss.driver.api.core.cql.PreparedStatement
+import com.edelweiss.software.tailnumber.server.common.Config
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
@@ -22,11 +23,16 @@ class CassandraExporter(val importer: RegistrationImporter) {
         serializersModule = CoreSerialization.serializersModule
     }
 
+    private val cassandraKeyspace = Config.getString("cassandra.keyspace")
+    private val cassandraHost = Config.getString("cassandra.contact-point.host")
+    private val cassandraPort = Config.getInt("cassandra.contact-point.port")
+    private val cassandraDataCenter = Config.getString("cassandra.datacenter")
+
     fun export() {
         CqlSession.builder()
-            .withKeyspace("tailnumber")
-            .addContactPoint(InetSocketAddress("localhost", 9042))
-            .withLocalDatacenter("datacenter1")
+            .withKeyspace(cassandraKeyspace)
+            .addContactPoint(InetSocketAddress(cassandraHost, cassandraPort))
+            .withLocalDatacenter(cassandraDataCenter)
             .build().use { session ->
 //                https://docs.datastax.com/en/developer/java-driver/4.13/manual/core/statements/batch/
 
