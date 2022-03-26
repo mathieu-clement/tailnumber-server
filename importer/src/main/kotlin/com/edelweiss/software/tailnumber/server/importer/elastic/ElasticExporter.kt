@@ -5,7 +5,7 @@ import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImporter
 import com.edelweiss.software.tailnumber.server.repositories.RegistrationRepository
 import com.edelweiss.software.tailnumber.server.repositories.cassandra.CassandraRegistrationRepository
-import com.edelweiss.software.tailnumber.server.search.elastic.ElasticRegistrationService
+import com.edelweiss.software.tailnumber.server.search.elastic.RegistrationSearchService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class ElasticExporter(val importer: RegistrationImporter, val offset: Int = 0) : KoinComponent {
 
-    private val elasticRegistrationService by inject<ElasticRegistrationService>()
+    private val elasticRegistrationService by inject<RegistrationSearchService>()
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -91,7 +91,7 @@ fun main(args: Array<String>) {
     startKoin {
         modules(module {
             single<RegistrationRepository> { CassandraRegistrationRepository() }
-            single { ElasticRegistrationService() }
+            single { RegistrationSearchService() }
             single { ElasticExporter(importer, offset) }
         })
 

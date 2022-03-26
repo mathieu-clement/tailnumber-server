@@ -3,6 +3,7 @@ package com.edelweiss.software.tailnumber.server.api.plugins
 import com.edelweiss.software.tailnumber.server.api.models.NotFoundErrorDTO
 import com.edelweiss.software.tailnumber.server.api.services.RegistrationService
 import com.edelweiss.software.tailnumber.server.core.exceptions.CountryNotFoundException
+import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrantNotFoundException
 import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationNotFoundException
 import io.ktor.application.*
 import io.ktor.features.*
@@ -25,6 +26,12 @@ fun Application.configureRouting() {
             val tailNumber = call.parameters["tailNumber"]!!
             call.respond(registrationService.findByTailNumber(tailNumber))
         }
+
+        get("/registrations/") {
+            val names = call.request.queryParameters["registrants"]?.split(",")
+            require(names != null && names.isNotEmpty() && names[0].isNotEmpty()) { "Parameter missing or empty" }
+            call.respond(registrationService.findByRegistrantNames(names.toSet()))
+        }
     }
 
     install(StatusPages) {
@@ -37,6 +44,9 @@ fun Application.configureRouting() {
                 is RegistrationNotFoundException ->
                     call.respond(HttpStatusCode.NotFound,
                         NotFoundErrorDTO("tailNumber", cause.registrationId.id))
+                is RegistrantNotFoundException ->
+                    call.respond(HttpStatusCode.NotFound,
+                        NotFoundErrorDTO("registrants", cause.names.joinToString(", ")))
                 is CountryNotFoundException ->
                     call.respond(HttpStatusCode.NotFound,
                         NotFoundErrorDTO("country", cause.rawRegistrationId))

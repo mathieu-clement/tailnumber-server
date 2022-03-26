@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 class NotFoundErrorDTO(
     val type: String,
-    val tailNumber: String
+    val value: String
 )

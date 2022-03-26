@@ -3,13 +3,13 @@ package com.edelweiss.software.tailnumber.server.search.elastic
 import com.edelweiss.software.tailnumber.server.common.Config
 import com.edelweiss.software.tailnumber.server.core.Address
 import com.edelweiss.software.tailnumber.server.core.Country
+import com.edelweiss.software.tailnumber.server.core.registration.PartialRegistration
 import com.edelweiss.software.tailnumber.server.core.registration.Registrant
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.search.elastic.dto.request.UpsertDoc
 import com.edelweiss.software.tailnumber.server.search.elastic.dto.request.search.*
-import com.edelweiss.software.tailnumber.server.search.elastic.dto.response.PartialRegistration
 import com.edelweiss.software.tailnumber.server.search.elastic.dto.response.SearchResponse
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelManager
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.security.KeyStore
 
-class ElasticRegistrationService : KoinComponent {
+class RegistrationSearchService : KoinComponent {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -163,10 +163,10 @@ class ElasticRegistrationService : KoinComponent {
 fun main() {
     startKoin {
         modules(module {
-            single { ElasticRegistrationService() }
+            single { RegistrationSearchService() }
         })
 
-        val service = koin.get<ElasticRegistrationService>()
+        val service = koin.get<RegistrationSearchService>()
         val registrations = service.findByRegistrantNames(setOf("BROWNE THOMAS JUAN"))
         println(registrations)
 //        val registrants = service.findRegistrants("BROWNE THOMAS JUAN")
