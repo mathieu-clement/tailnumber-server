@@ -1,4 +1,4 @@
-package com.edelweiss.software.tailnumber.server.importer.elastic
+package com.edelweiss.software.tailnumber.server.search.elastic
 
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import kotlinx.serialization.EncodeDefault

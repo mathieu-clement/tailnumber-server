@@ -5,6 +5,10 @@ plugins {
 
 group 'com.edelweiss.software.tailnumber.server'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
     implementation 'com.google.guava:guava:31.1-jre'
@@ -23,11 +27,5 @@ dependencies {
     implementation "io.insert-koin:koin-logger-slf4j:$koin_version"
 
     implementation project(':common')
-    implementation project(':search')
-    implementation project(':registries')
     implementation project(':core')
-}
-
-test {
-    useJUnitPlatform()
 }

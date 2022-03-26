@@ -1,46 +1,34 @@
 package com.edelweiss.software.tailnumber.server.importer.elastic
 
-import com.edelweiss.software.tailnumber.server.common.Config
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
-import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImporter
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.FuelManager
-import com.github.kittinunf.fuel.core.extensions.authentication
-import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.edelweiss.software.tailnumber.server.repositories.RegistrationRepository
+import com.edelweiss.software.tailnumber.server.repositories.cassandra.CassandraRegistrationRepository
+import com.edelweiss.software.tailnumber.server.search.elastic.ElasticRegistrationService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.security.KeyStore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-class ElasticExporter(val importer: RegistrationImporter, val offset: Int = 0) {
+class ElasticExporter(val importer: RegistrationImporter, val offset: Int = 0) : KoinComponent {
+
+    private val elasticRegistrationService by inject<ElasticRegistrationService>()
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val json = Json {
-        prettyPrint = false
-        serializersModule = CoreSerialization.serializersModule
-    }
-
-    private val elasticIndex = "registrations"
-    private val elasticHost = Config.getString("elastic.host")
-    private val elasticPort = Config.getInt("elastic.port")
-
     fun export() {
-        configureKeystore()
-
         val counter = AtomicInteger(0)
         val startTime = System.currentTimeMillis()
 
         val registrations = importer.import()
-        val numRegistrations = registrations.size
+        val numRegistrations = registrations.size - offset
 
         if (offset != 0) logger.warn("#### Starting from offset $offset ####")
 
@@ -53,7 +41,7 @@ class ElasticExporter(val importer: RegistrationImporter, val offset: Int = 0) {
                 .sorted()
                 .subList(offset, registrations.size)
                 .forEach { registration ->
-                    update(registration)
+                    elasticRegistrationService.insertOrUpdate(registration)
                     printProgress(startTime, counter.incrementAndGet(), numRegistrations)
                 }
         }
@@ -73,7 +61,7 @@ class ElasticExporter(val importer: RegistrationImporter, val offset: Int = 0) {
                 .map { sublist ->
                     async {
                         sublist.forEach { registration ->
-                            update(registration)
+                            elasticRegistrationService.insertOrUpdate(registration)
                             printProgress(startTime, counter.incrementAndGet(), numRegistrations)
                         }
                     }
@@ -93,34 +81,20 @@ class ElasticExporter(val importer: RegistrationImporter, val offset: Int = 0) {
             TimeUnit.MILLISECONDS.toSeconds(remainingTimeMillis) - TimeUnit.MINUTES.toSeconds(remainingMinutes)
         print("\r$counter (${(100 * counter / numRegistrations)} %), $remainingMinutes min $remainingSeconds sec remaining")
     }
-
-    private fun update(registration: Registration) {
-        val upsertJson = json.encodeToString(UpsertDoc(registration))
-        val (request, response, result) = Fuel.post("https://$elasticHost:$elasticPort/$elasticIndex/_update/${registration.registrationId.id}")
-            .jsonBody(upsertJson)
-            .authentication()
-            .basic("elastic", "J8QyF0o*2DBWbKuxJ+8l")
-            .response()
-        check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}: ${String(response.data)}" }
-    }
-
-    fun configureKeystore() {
-        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-        val password = "trustmeimanengineer".toCharArray()
-        keyStore.load(
-            File("/Users/mathieuclement/dev/elastic/truststore.jks").inputStream(),
-            password
-        )
-        FuelManager.instance.keystore = keyStore
-    }
 }
 
 fun main(args: Array<String>) {
     val basePath = args[0]
-    val offset = if (args.size > 1) args[1].toInt() else 0
     val importer = FaaRegistrationImporter(basePath)
-//    val exporter = CassandraExporter(importer)
-//    exporter.export()
-    val exporter = ElasticExporter(importer, offset)
-    exporter.export()
+    val offset = if (args.size > 1) args[1].toInt() else 0
+
+    startKoin {
+        modules(module {
+            single<RegistrationRepository> { CassandraRegistrationRepository() }
+            single { ElasticRegistrationService() }
+            single { ElasticExporter(importer, offset) }
+        })
+
+        koin.get<ElasticExporter>().export()
+    }
 }
