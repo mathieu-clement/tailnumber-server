@@ -27,5 +27,5 @@ data class Registration(
     @Contextual
     val transponderCode: TransponderCode,
     val fractionalOwnership: Boolean = false,
-    val coOwners: List<String> = emptyList(),
+    val coOwners: List<String> = emptyList()
     )

@@ -32,45 +32,47 @@ class CassandraExporter(val importer: RegistrationImporter) {
         createSession().use { session ->
 //                https://docs.datastax.com/en/developer/java-driver/4.13/manual/core/statements/batch/
 
-                val preparedInsert: PreparedStatement = session.prepare(
-                    "INSERT INTO registrations (id, country, record) " +
-                            "VALUES (:id, :country, :record)"
-                )
+            // TODO We could do a live update by deleting records that have disappeared and update those that still exist
 
-                var counter = 0
+            val preparedInsert: PreparedStatement = session.prepare(
+                "INSERT INTO registrations (id, country, record) " +
+                        "VALUES (:id, :country, :record)"
+            )
 
-                importer.import().chunked(1).forEach { chunk: List<Registration> ->
-                    val batchBuilder = BatchStatement.builder(DefaultBatchType.LOGGED)
-                    chunk.forEach { registration ->
-                        batchBuilder.addStatement(
-                            preparedInsert.bind(
-                                registration.registrationId.id,
-                                registration.registrationId.country.name,
-                                json.encodeToString(registration)
-                            )
+            var counter = 0
+
+            importer.import().chunked(1).forEach { chunk: List<Registration> ->
+                val batchBuilder = BatchStatement.builder(DefaultBatchType.LOGGED)
+                chunk.forEach { registration ->
+                    batchBuilder.addStatement(
+                        preparedInsert.bind(
+                            registration.registrationId.id,
+                            registration.registrationId.country.name,
+                            json.encodeToString(registration)
                         )
-                    }
-                    val batch = batchBuilder.build()
-                    session.execute(batch)
-
-                    counter += 1
-                    print("\r$counter")
+                    )
                 }
+                val batch = batchBuilder.build()
+                session.execute(batch)
 
-
-                /*
-                importer.import().forEach { registration ->
-                    val insert = insertInto("registrations")
-                        .value("id", literal(registration.registrationId.id))
-                        .value("country", literal(registration.registrationId.country.name))
-                        .value("record", literal(json.encodeToString(registration)))
-                        .build()
-                    session.execute(insert)
-                    counter++
-                    print("\r$counter")
-                }
-                 */
+                counter += 1
+                print("\r$counter")
             }
+
+
+            /*
+            importer.import().forEach { registration ->
+                val insert = insertInto("registrations")
+                    .value("id", literal(registration.registrationId.id))
+                    .value("country", literal(registration.registrationId.country.name))
+                    .value("record", literal(json.encodeToString(registration)))
+                    .build()
+                session.execute(insert)
+                counter++
+                print("\r$counter")
+            }
+             */
+        }
     }
 
     private fun createSession() = CqlSession.builder()
