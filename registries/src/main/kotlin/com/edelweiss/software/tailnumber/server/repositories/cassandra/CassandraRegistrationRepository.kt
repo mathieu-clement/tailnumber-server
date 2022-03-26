@@ -4,7 +4,7 @@ import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder.literal
 import com.edelweiss.software.tailnumber.server.common.Config
-import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationNotFoundException
+import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationsNotFoundException
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
@@ -28,16 +28,17 @@ class CassandraRegistrationRepository : RegistrationRepository {
     private val cassandraPort = Config.getInt("cassandra.contact-point.port")
     private val cassandraDataCenter = Config.getString("cassandra.datacenter")
 
-    override fun findByRegistrationId(registrationId: RegistrationId): Registration =
+    override fun findByRegistrationIds(registrationIds: List<RegistrationId>): List<Registration> =
         getSession().let { session ->
             val select = QueryBuilder.selectFrom("registrations")
                 .column("record")
-                .whereColumn("id").isEqualTo(literal(registrationId.id))
+                .whereColumn("id").`in`(registrationIds.map { literal(it.id) })
                 .build()
             val resultSet = session.execute(select)
-            resultSet.one()?.let { row ->
-                json.decodeFromString(row.getString("record")!!)
-            } ?: throw RegistrationNotFoundException(registrationId)
+            return resultSet.map { row ->
+                json.decodeFromString<Registration>(row.getString("record")!!)
+            }.toList()
+                .ifEmpty { throw RegistrationsNotFoundException(registrationIds) }
         }
 
     private fun getSession() : CqlSession {

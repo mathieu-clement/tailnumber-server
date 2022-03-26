@@ -12,7 +12,7 @@ fun main() {
         })
 
         val repo = koin.get<RegistrationRepository>()
-        val registration = repo.findByRegistrationId("N9076H")
+        val registration = repo.findByTailNumbers(listOf("N9076H"))
         println(registration)
     }
 }

@@ -6,8 +6,8 @@ import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
 interface RegistrationRepository {
 //    fun getAll() : Sequence<Registration>
 
-    fun findByRegistrationId(tailNumber: String) =
-        findByRegistrationId(RegistrationId.fromTailNumber(tailNumber))
+    fun findByTailNumbers(tailNumbers: List<String>) =
+        findByRegistrationIds(tailNumbers.map { RegistrationId.fromTailNumber(it) })
 
-    fun findByRegistrationId(registrationId: RegistrationId) : Registration
+    fun findByRegistrationIds(registrationIds: List<RegistrationId>) : List<Registration>
 }
