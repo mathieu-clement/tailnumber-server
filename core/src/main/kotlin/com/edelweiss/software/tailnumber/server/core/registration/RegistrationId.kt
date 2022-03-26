@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 data class RegistrationId(
     val id: String,
     val country: Country
-) {
+) : Comparable<RegistrationId> {
     companion object {
         fun fromTailNumber(rawId: String) : RegistrationId {
             val sanitizedId = rawId
@@ -25,4 +25,5 @@ data class RegistrationId(
     }
 
     override fun toString() = "$id (${country.name})"
+    override fun compareTo(other: RegistrationId) = id.compareTo(other.id)
 }

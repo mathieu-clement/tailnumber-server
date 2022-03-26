@@ -28,4 +28,6 @@ data class Registration(
     val transponderCode: TransponderCode,
     val fractionalOwnership: Boolean = false,
     val coOwners: List<String> = emptyList()
-    )
+) : Comparable<Registration> {
+    override fun compareTo(other: Registration) = this.registrationId.compareTo(other.registrationId)
+}
