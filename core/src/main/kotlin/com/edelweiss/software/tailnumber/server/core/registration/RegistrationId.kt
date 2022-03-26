@@ -2,10 +2,11 @@ package com.edelweiss.software.tailnumber.server.core.registration
 
 import com.edelweiss.software.tailnumber.server.core.Country
 import com.edelweiss.software.tailnumber.server.core.exceptions.CountryNotFoundException
+import com.edelweiss.software.tailnumber.server.core.serializers.RegistrationIdSerializer
 
 import kotlinx.serialization.Serializable
 
-@Serializable
+@Serializable(with = RegistrationIdSerializer::class)
 data class RegistrationId(
     val id: String,
     val country: Country
