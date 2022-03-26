@@ -1,12 +1,42 @@
 package com.edelweiss.software.tailnumber.server.search.elastic.dto.response
 
-import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
+import com.edelweiss.software.tailnumber.server.search.elastic.serializers.IntFieldValueUnwrapperSerializer
+import com.edelweiss.software.tailnumber.server.search.elastic.serializers.StringFieldValueUnwrapperSerializer
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.Serializable
 
-@kotlinx.serialization.Serializable
+@Serializable
 data class FieldsResponse(
-    @SerialName("registrant.name") val registrantName: List<String>? = null,
-    @SerialName("registrant.address") val registrantAddress: JsonObject? = null,
-@SerialName("registrationId.id") val registrationId : List<RegistrationId>? = null
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrant.name") val registrantName: String,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrant.address.street1") val registrantAddressStreet1: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrant.address.street2") val registrantAddressStreet2: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrant.address.city") val registrantAddressCity: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrant.address.state") val registrantAddressState: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrant.address.zipCode") val registrantAddressZipCode: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("aircraftReference.manufacturer") val aircraftReferenceManufacturer : String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("aircraftReference.model") val aircraftReferenceModel : String? = null,
+
+    @Serializable(with = IntFieldValueUnwrapperSerializer::class)
+    @SerialName("aircraftReference.manufactureYear") val aircraftReferenceManufactureYear : Int? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrationId.id") val registrationIdId : String,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrationId.country") val registrationIdCountry : String
 )
