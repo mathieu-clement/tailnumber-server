@@ -8,7 +8,6 @@ import com.edelweiss.software.tailnumber.server.core.airworthiness.Airworthiness
 import com.edelweiss.software.tailnumber.server.core.airworthiness.AirworthinessOperation
 import com.edelweiss.software.tailnumber.server.core.engine.*
 import com.edelweiss.software.tailnumber.server.core.registration.*
-import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.acftref.AcftRefImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.acftref.AcftRefRecord
@@ -17,9 +16,6 @@ import com.edelweiss.software.tailnumber.server.importer.faa.engine.EngineRecord
 import com.edelweiss.software.tailnumber.server.importer.faa.master.MasterImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.master.MasterRecord
 import com.edelweiss.software.tailnumber.server.importer.zipcodes.ZipCodeRepository
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
@@ -212,10 +208,12 @@ class FaaRegistrationImporter(
 }
 
 fun main(args: Array<String>) {
+    require(args.isNotEmpty()) { "Usage: FaaRegistrationImporter ReleasableAircraft/" }
     val basePath = args[0]
 
     startKoin {
         modules(module {
+            single { ZipCodeRepository() }
             single { FaaRegistrationImporter(basePath) }
         })
 
@@ -223,14 +221,6 @@ fun main(args: Array<String>) {
             it.registrationId.id == "N12234"
         }
 
-        val json = Json {
-            prettyPrint = true
-            serializersModule = CoreSerialization.serializersModule
-        }
-        val str = json.encodeToString(n12234)
-        println(str)
-
-        val reg = json.decodeFromString<Registration>(str)
-        println(reg)
+        println(n12234)
     }
 }

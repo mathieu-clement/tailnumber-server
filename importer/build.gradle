@@ -31,3 +31,18 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+task importFaa(type: JavaExec) {
+    main = 'com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImporterKt'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task exportFaaToCassandra(type: JavaExec) {
+    main = 'com.edelweiss.software.tailnumber.server.importer.cassandra.CassandraExporterKt'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task exportFaaToElasticSearch(type: JavaExec) {
+    main = 'com.edelweiss.software.tailnumber.server.importer.elastic.ElasticExporterKt'
+    classpath = sourceSets.main.runtimeClasspath
+}

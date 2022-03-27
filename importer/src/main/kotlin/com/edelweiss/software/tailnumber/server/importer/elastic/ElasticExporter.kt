@@ -1,5 +1,6 @@
 package com.edelweiss.software.tailnumber.server.importer.elastic
 
+import com.edelweiss.software.tailnumber.server.core.Country
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImporter
@@ -13,34 +14,37 @@ import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-class ElasticExporter(private val offset: Int = 0) : KoinComponent {
+class ElasticExporter() : KoinComponent {
 
-    private val importer by inject<RegistrationImporter>()
+    private val faaImporter by inject<RegistrationImporter>(named(Country.US))
 
     private val elasticRegistrationService by inject<RegistrationSearchService>()
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun export(runInParallel: Boolean = false) {
+    fun export(runInParallel: Boolean = false, countries: Set<Country> = setOf(Country.US)) {
         val counter = AtomicInteger(0)
         val startTime = System.currentTimeMillis()
 
-        val registrations = importer.import()
-        val numRegistrations = registrations.size - offset
+        val registrations: MutableList<Registration> = mutableListOf()
+        if (Country.US in countries) {
+            logger.info("Exporting FAA data")
+            registrations += faaImporter.import()
+        }
 
-        if (offset != 0) logger.warn("#### Starting from offset $offset ####")
+        val numRegistrations = registrations.size
 
         if (runInParallel) {
             updateInParallel(registrations, startTime, counter, numRegistrations)
         } else {
             registrations
                 .sorted()
-                .subList(offset, registrations.size)
                 .forEach { registration ->
                     elasticRegistrationService.insertOrUpdate(registration)
                     printProgress(startTime, counter.incrementAndGet(), numRegistrations)
@@ -57,7 +61,6 @@ class ElasticExporter(private val offset: Int = 0) : KoinComponent {
         runBlocking {
             val deferreds = registrations
                 .sorted()
-                .subList(offset, registrations.size)
                 .chunked(registrations.size / 4)
                 .map { sublist ->
                     async {
@@ -85,18 +88,19 @@ class ElasticExporter(private val offset: Int = 0) : KoinComponent {
 }
 
 fun main(args: Array<String>) {
-    val basePath = args[0]
-    val offset = if (args.size > 1) args[1].toInt() else 0
+    require(args.size > 1) { "Usage: ElasticExporter US,CH FaaReleasableAircraft/" }
+    val countries = args[0].split(",").map { Country.valueOf(it) }.toSet()
+    val basePath = args[1]
 
     startKoin {
         modules(module {
             single { ZipCodeRepository() }
-            single { FaaRegistrationImporter(basePath) }
+            single<RegistrationImporter>(named(Country.US)) { FaaRegistrationImporter(basePath) }
             single<RegistrationRepository> { CassandraRegistrationRepository() }
             single { RegistrationSearchService() }
-            single { ElasticExporter(offset) }
+            single { ElasticExporter() }
         })
 
-        koin.get<ElasticExporter>().export()
+        koin.get<ElasticExporter>().export(countries = countries)
     }
 }

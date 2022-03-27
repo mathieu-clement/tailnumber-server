@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
+    id 'application'
 }
 
 group 'com.edelweiss.software.tailnumber.server'
@@ -28,4 +29,8 @@ dependencies {
 //    implementation "io.ktor:ktor-locations:$ktor_version"
     implementation "io.insert-koin:koin-ktor:$koin_version"
     implementation "io.insert-koin:koin-logger-slf4j:$koin_version"
+}
+
+application {
+    mainClass = 'com.edelweiss.software.tailnumber.server.api.ApiServerKt'
 }
