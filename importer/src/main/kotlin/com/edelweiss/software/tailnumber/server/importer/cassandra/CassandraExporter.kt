@@ -4,9 +4,11 @@ import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.core.cql.BatchStatement
 import com.datastax.oss.driver.api.core.cql.DefaultBatchType
 import com.datastax.oss.driver.api.core.cql.PreparedStatement
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder
 import com.edelweiss.software.tailnumber.server.common.Config
 import com.edelweiss.software.tailnumber.server.core.Country
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
+import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImporter
@@ -45,8 +47,8 @@ class CassandraExporter : KoinComponent {
             // TODO We could do a live update by deleting records that have disappeared and update those that still exist
 
             val preparedInsert: PreparedStatement = session.prepare(
-                "INSERT INTO registrations (id, country, record) " +
-                        "VALUES (:id, :country, :record)"
+                "UPDATE registrations SET country = :country, record = :record " +
+                        "WHERE id = :id"
             )
 
             val counter = AtomicInteger(0)
@@ -58,6 +60,12 @@ class CassandraExporter : KoinComponent {
                 registrations += faaImporter.import()
             }
 
+            val existingRegistrationIds : Set<RegistrationId> = existingRegistrationIds(session)
+            val newRegistrationIds : Set<RegistrationId> = registrations.map { it.registrationId }.toSet()
+            val deletedRegistrationIds = existingRegistrationIds - newRegistrationIds.intersect(existingRegistrationIds)
+            logger.info("Deleted registrations: ${deletedRegistrationIds.map { it.id }}")
+            if (deletedRegistrationIds.isNotEmpty()) delete(deletedRegistrationIds, session)
+
             val numRegistrations = registrations.size // - offset
 
             registrations.chunked(1).forEach { chunk: List<Registration> ->
@@ -65,9 +73,9 @@ class CassandraExporter : KoinComponent {
                 chunk.forEach { registration ->
                     batchBuilder.addStatement(
                         preparedInsert.bind(
-                            registration.registrationId.id,
                             registration.registrationId.country.name,
-                            json.encodeToString(registration)
+                            json.encodeToString(registration),
+                            registration.registrationId.id,
                         )
                     )
                 }
@@ -75,23 +83,27 @@ class CassandraExporter : KoinComponent {
                 session.execute(batch)
 
                 printProgress(startTime, counter.incrementAndGet(), numRegistrations)
-//                print("\r$counter")
             }
-
-
-            /*
-            importer.import().forEach { registration ->
-                val insert = insertInto("registrations")
-                    .value("id", literal(registration.registrationId.id))
-                    .value("country", literal(registration.registrationId.country.name))
-                    .value("record", literal(json.encodeToString(registration)))
-                    .build()
-                session.execute(insert)
-                counter++
-                print("\r$counter")
-            }
-             */
         }
+    }
+
+    private fun delete(ids: Set<RegistrationId>, session: CqlSession) {
+        session.execute(
+            QueryBuilder.deleteFrom("registrations")
+                .whereColumn("id").`in`(ids.map { QueryBuilder.literal(it.id) })
+                .build()
+        )
+    }
+
+    private fun existingRegistrationIds(session: CqlSession): Set<RegistrationId> {
+        val resultSet = session.execute(
+            QueryBuilder.selectFrom("registrations")
+                .column("id")
+                .column("country")
+                .build())
+        return resultSet.map {
+            row -> RegistrationId(row.getString("id")!!, Country.valueOf(row.getString("country")!!))
+        }.toSet()
     }
 
     private fun printProgress(startTime: Long, counter: Int, numRegistrations: Int) {
