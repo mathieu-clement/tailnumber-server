@@ -6,6 +6,8 @@ import java.io.File
 
 /**
  * A simple CSV (or TSV) parser that returns a [table] of rows.
+ *
+ * @param isExternalFile true if file is outside of JAR, false otherwise
  */
 class CsvParser(val filename: String, val columnDelimiter : Char = ',', val quoteChar: Char? = '"', val isExternalFile: Boolean) {
 
@@ -14,8 +16,8 @@ class CsvParser(val filename: String, val columnDelimiter : Char = ',', val quot
     private lateinit var _table : List<List<String>>
     private lateinit var _columns : Map<String, Int>
 
-    fun table(): List<List<String>> {
-        if (this::_table.isInitialized) return _table
+    fun table(skipHeader: Boolean = false): List<List<String>> {
+        if (this::_table.isInitialized) return if (skipHeader) _table.drop(1) else _table
 
         val table: MutableList<List<String>> = mutableListOf()
         var lineNo = 0
@@ -40,7 +42,7 @@ class CsvParser(val filename: String, val columnDelimiter : Char = ',', val quot
         }
 
         _table = table
-        return table
+        return if (skipHeader) _table.drop(1) else _table
     }
 
     fun columns(): Map<String, Int> {

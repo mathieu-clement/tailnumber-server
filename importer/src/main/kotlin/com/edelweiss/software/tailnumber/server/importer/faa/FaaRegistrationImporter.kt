@@ -16,9 +16,14 @@ import com.edelweiss.software.tailnumber.server.importer.faa.engine.EngineImport
 import com.edelweiss.software.tailnumber.server.importer.faa.engine.EngineRecord
 import com.edelweiss.software.tailnumber.server.importer.faa.master.MasterImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.master.MasterRecord
+import com.edelweiss.software.tailnumber.server.importer.zipcodes.ZipCodeRepository
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -28,9 +33,11 @@ class FaaRegistrationImporter(
     acftRefFilename: String = "ACFTREF.txt",
     engineFilename: String = "ENGINE.txt",
     masterFilename: String = "MASTER.txt"
-) : RegistrationImporter {
+) : RegistrationImporter, KoinComponent {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val zipCodeRepository by inject<ZipCodeRepository>()
 
     private val acftRefImporter = AcftRefImporter("$basePath/$acftRefFilename")
     private val engineImporter = EngineImporter("$basePath/$engineFilename")
@@ -150,10 +157,20 @@ class FaaRegistrationImporter(
         country: String?
     ): Address? {
         if (street == null && street2 == null && city == null && zipCode == null && country == null) return null
-        return Address(street, street2, city, state,
+        return Address(street, street2, city, fetchStateIfNull(state, zipCode),
             if (country == "US") parseUsZipCode(zipCode) else zipCode,
             country)
     }
+
+    private fun fetchStateIfNull(state: String?, zipCode: String?): String? = when {
+        !state.isNullOrBlank() -> state
+        zipCode.isNullOrBlank() -> null
+        else -> doFetchState(zipCode)
+    }
+
+    private fun doFetchState(zipCode: String): String? =
+        if (zipCode.length < 5) null
+        else zipCodeRepository.state(zipCode.substring(0, 5))
 
     private fun parseUsZipCode(zipCode: String?): String? = when {
         zipCode == null -> null
@@ -196,19 +213,24 @@ class FaaRegistrationImporter(
 
 fun main(args: Array<String>) {
     val basePath = args[0]
-    val importer = FaaRegistrationImporter(basePath)
 
-    val n12234 = importer.import().first {
-        it.registrationId.id == "N12234"
-    }
+    startKoin {
+        modules(module {
+            single { FaaRegistrationImporter(basePath) }
+        })
 
-    val json = Json {
-        prettyPrint = true
-        serializersModule = CoreSerialization.serializersModule
+        val n12234 = koin.get<FaaRegistrationImporter>().import().first {
+            it.registrationId.id == "N12234"
         }
-    val str = json.encodeToString(n12234)
-    println(str)
 
-    val reg = json.decodeFromString<Registration>(str)
-    println(reg)
+        val json = Json {
+            prettyPrint = true
+            serializersModule = CoreSerialization.serializersModule
+        }
+        val str = json.encodeToString(n12234)
+        println(str)
+
+        val reg = json.decodeFromString<Registration>(str)
+        println(reg)
+    }
 }

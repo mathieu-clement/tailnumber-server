@@ -3,6 +3,7 @@ package com.edelweiss.software.tailnumber.server.importer.elastic
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImporter
+import com.edelweiss.software.tailnumber.server.importer.zipcodes.ZipCodeRepository
 import com.edelweiss.software.tailnumber.server.repositories.RegistrationRepository
 import com.edelweiss.software.tailnumber.server.repositories.cassandra.CassandraRegistrationRepository
 import com.edelweiss.software.tailnumber.server.search.elastic.RegistrationSearchService
@@ -17,13 +18,15 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-class ElasticExporter(val importer: RegistrationImporter, val offset: Int = 0) : KoinComponent {
+class ElasticExporter(private val offset: Int = 0) : KoinComponent {
+
+    private val importer by inject<RegistrationImporter>()
 
     private val elasticRegistrationService by inject<RegistrationSearchService>()
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun export() {
+    fun export(runInParallel: Boolean = false) {
         val counter = AtomicInteger(0)
         val startTime = System.currentTimeMillis()
 
@@ -31,8 +34,6 @@ class ElasticExporter(val importer: RegistrationImporter, val offset: Int = 0) :
         val numRegistrations = registrations.size - offset
 
         if (offset != 0) logger.warn("#### Starting from offset $offset ####")
-
-        val runInParallel = false
 
         if (runInParallel) {
             updateInParallel(registrations, startTime, counter, numRegistrations)
@@ -85,14 +86,15 @@ class ElasticExporter(val importer: RegistrationImporter, val offset: Int = 0) :
 
 fun main(args: Array<String>) {
     val basePath = args[0]
-    val importer = FaaRegistrationImporter(basePath)
     val offset = if (args.size > 1) args[1].toInt() else 0
 
     startKoin {
         modules(module {
+            single { ZipCodeRepository() }
+            single { FaaRegistrationImporter(basePath) }
             single<RegistrationRepository> { CassandraRegistrationRepository() }
             single { RegistrationSearchService() }
-            single { ElasticExporter(importer, offset) }
+            single { ElasticExporter(offset) }
         })
 
         koin.get<ElasticExporter>().export()

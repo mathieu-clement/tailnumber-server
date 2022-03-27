@@ -9,14 +9,22 @@ import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImporter
+import com.edelweiss.software.tailnumber.server.importer.zipcodes.ZipCodeRepository
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
-class CassandraExporter(val importer: RegistrationImporter) {
+class CassandraExporter : KoinComponent {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val importer by inject<RegistrationImporter>()
 
     private val json = Json {
         prettyPrint = false
@@ -39,9 +47,13 @@ class CassandraExporter(val importer: RegistrationImporter) {
                         "VALUES (:id, :country, :record)"
             )
 
-            var counter = 0
+            val counter = AtomicInteger(0)
+            val startTime = System.currentTimeMillis()
 
-            importer.import().chunked(1).forEach { chunk: List<Registration> ->
+            val registrations = importer.import()
+            val numRegistrations = registrations.size // - offset
+
+            registrations.chunked(1).forEach { chunk: List<Registration> ->
                 val batchBuilder = BatchStatement.builder(DefaultBatchType.LOGGED)
                 chunk.forEach { registration ->
                     batchBuilder.addStatement(
@@ -55,8 +67,8 @@ class CassandraExporter(val importer: RegistrationImporter) {
                 val batch = batchBuilder.build()
                 session.execute(batch)
 
-                counter += 1
-                print("\r$counter")
+                printProgress(startTime, counter.incrementAndGet(), numRegistrations)
+//                print("\r$counter")
             }
 
 
@@ -75,6 +87,18 @@ class CassandraExporter(val importer: RegistrationImporter) {
         }
     }
 
+    private fun printProgress(startTime: Long, counter: Int, numRegistrations: Int) {
+        if (counter % 100 != 0) return
+        val currentTime = System.currentTimeMillis()
+        val averageMillisPerUpsert = (currentTime - startTime) / counter
+        val remainingUpserts = numRegistrations - counter
+        val remainingTimeMillis = remainingUpserts * averageMillisPerUpsert
+        val remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(remainingTimeMillis)
+        val remainingSeconds =
+            TimeUnit.MILLISECONDS.toSeconds(remainingTimeMillis) - TimeUnit.MINUTES.toSeconds(remainingMinutes)
+        print("\r$counter (${(100 * counter / numRegistrations)} %), $remainingMinutes min $remainingSeconds sec remaining")
+    }
+
     private fun createSession() = CqlSession.builder()
         .withKeyspace(cassandraKeyspace)
         .addContactPoint(InetSocketAddress(cassandraHost, cassandraPort))
@@ -83,8 +107,15 @@ class CassandraExporter(val importer: RegistrationImporter) {
 }
 
 fun main(args: Array<String>) {
-    val basePath = args[0]
-    val importer = FaaRegistrationImporter(basePath)
-    val exporter = CassandraExporter(importer)
-    exporter.export()
+    val faaDataBasePath = args[0]
+
+    startKoin {
+        modules(module {
+            single { ZipCodeRepository() }
+            single<RegistrationImporter> { FaaRegistrationImporter(faaDataBasePath) }
+            single { CassandraExporter() }
+        })
+
+        koin.get<CassandraExporter>().export()
+    }
 }
