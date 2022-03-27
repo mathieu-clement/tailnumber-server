@@ -80,18 +80,17 @@ class FaaRegistrationImporter(
             registrationId = RegistrationId("N" + masterRecord.nNumber, Country.US),
             recordId = masterRecord.uniqueId,
             status = RegistrationStatus.fromFaaCode(masterRecord.statusCode),
-            serialNumber = masterRecord.serialNumber,
             aircraftReference = AircraftReference(
                 aircraftType = AircraftType.fromFaaCode(masterRecord.typeAircraft),
                 aircraftCategory = acftRefRecord?.let { AircraftCategory.fromFaaCode(it.acCat) },
                 manufacturer = acftRefRecord?.mfr,
                 model =  acftRefRecord?.model,
+                serialNumber = masterRecord.serialNumber,
                 typeCertificated = acftRefRecord?.buildCertInd == 0,
                 engines = acftRefRecord?.noEng,
                 seats = acftRefRecord?.noSeats,
                 weightCategory = acftRefRecord?.let { WeightCategory.fromFaaCode(it.acWeight) },
                 cruisingSpeed = acftRefRecord?.speed?.let { Speed(it, SpeedUnit.MPH) }.takeIf { it?.value != 0 },
-                numberOfSeats = acftRefRecord?.noSeats,
                 manufactureYear = masterRecord.yearMfr,
                 kitManufacturerName = masterRecord.kitMfr,
                 kitModelName = masterRecord.kitModel
@@ -106,7 +105,7 @@ class FaaRegistrationImporter(
                 )
             },
             registrantType = masterRecord.typeRegistrant?.let { RegistrantType.fromFaaCode(it) },
-            registrant = parseRegistrant(
+            owner = parseRegistrant(
                 masterRecord.name,
                 masterRecord.street,
                 masterRecord.street2,
