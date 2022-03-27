@@ -8,5 +8,5 @@ data class PartialRegistration(
     val manufacturer: String?,
     val model: String?,
     val year: Int?,
-    val registrant: Registrant
+    val registrant: StructuredRegistrant
 )

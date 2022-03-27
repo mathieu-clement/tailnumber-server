@@ -1,6 +1,5 @@
 package com.edelweiss.software.tailnumber.server.importer.faa
 
-import com.edelweiss.software.tailnumber.server.core.Address
 import com.edelweiss.software.tailnumber.server.core.Country
 import com.edelweiss.software.tailnumber.server.core.aircraft.*
 import com.edelweiss.software.tailnumber.server.core.airworthiness.Airworthiness
@@ -105,7 +104,7 @@ class FaaRegistrationImporter(
                 )
             },
             registrantType = masterRecord.typeRegistrant?.let { RegistrantType.fromFaaCode(it) },
-            owner = parseRegistrant(
+            registrant = parseRegistrant(
                 masterRecord.name,
                 masterRecord.street,
                 masterRecord.street2,
@@ -139,9 +138,9 @@ class FaaRegistrationImporter(
         zipCode: String?,
         state: String?,
         country: String?
-    ): Registrant? =
-        Registrant(name, parseAddress(street, street2, city, zipCode, state, country))
-            .takeIf { it.address != null && it.name != null }
+    ): StructuredRegistrant? =
+        StructuredRegistrant(name, AddressOrString(address = parseAddress(street, street2, city, zipCode, state, country)))
+            .takeIf { it.address?.address != null && it.name != null }
 
     private fun parseAddress(
         street: String?,

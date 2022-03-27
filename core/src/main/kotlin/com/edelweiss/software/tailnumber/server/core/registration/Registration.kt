@@ -15,8 +15,9 @@ data class Registration(
     val aircraftReference: AircraftReference,
     val engineReference: EngineReference? = null,
     val registrantType: RegistrantType? = null,
-    val owner: Registrant? = null, // Owner in CH registry, "registrant" in US registry
-    val operator: Registrant? = null, // CH registry only
+    val registrant: StructuredRegistrant? = null, // US registry
+    val owner: StructuredRegistrant? = null, // CH registry
+    val operator: StructuredRegistrant? = null, // CH registry
     @Contextual
     val certificateIssueDate: LocalDate? = null,
     @Contextual

@@ -1,4 +1,4 @@
-package com.edelweiss.software.tailnumber.server.core
+package com.edelweiss.software.tailnumber.server.core.registration
 
 import kotlinx.serialization.Serializable
 

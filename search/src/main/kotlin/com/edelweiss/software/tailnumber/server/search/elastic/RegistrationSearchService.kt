@@ -1,12 +1,8 @@
 package com.edelweiss.software.tailnumber.server.search.elastic
 
 import com.edelweiss.software.tailnumber.server.common.Config
-import com.edelweiss.software.tailnumber.server.core.Address
 import com.edelweiss.software.tailnumber.server.core.Country
-import com.edelweiss.software.tailnumber.server.core.registration.PartialRegistration
-import com.edelweiss.software.tailnumber.server.core.registration.Registrant
-import com.edelweiss.software.tailnumber.server.core.registration.Registration
-import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
+import com.edelweiss.software.tailnumber.server.core.registration.*
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.search.elastic.dto.request.UpsertDoc
 import com.edelweiss.software.tailnumber.server.search.elastic.dto.request.search.*
@@ -123,7 +119,7 @@ class RegistrationSearchService : KoinComponent {
                 PartialRegistration(
                     RegistrationId(fields.registrationIdId, Country.valueOf(fields.registrationIdCountry)),
                     fields.aircraftReferenceManufacturer, fields.aircraftReferenceModel, fields.aircraftReferenceManufactureYear,
-                    Registrant(
+                    StructuredRegistrant(
                         fields.registrantName,
                         Address(
                             fields.registrantAddressStreet1,
