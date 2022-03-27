@@ -142,6 +142,10 @@ gradle-app.setting
 
 **/.DS_Store
 
+**/*.pdf
+**/*.html
+**/.*.swp
+
 # End of https://www.toptal.com/developers/gitignore/api/intellij,gradle,java,kotlin
 
 common/src/main/resources/tailnumber.properties
