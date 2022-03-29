@@ -13,7 +13,7 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ChRegistrationSummaryHtmlParserTest {
 
-    private val parser = ChRegistrationSummaryHtmlParser()
+    private val parser = ChRegistrationSummaryHtmlParser("pubs.html", false)
     private val registrations: Map<String, Registration> = parser.import().associateBy { it.registrationId.id }
 
     @Test
@@ -35,8 +35,26 @@ class ChRegistrationSummaryHtmlParserTest {
     }
 
     @Test
+    fun lastRecord() {
+        assertReg(
+            "HB-ISB",
+            "DOUGLAS AIRCRAFT COMPANY, INC.",
+        "DC-3C-S1C3G",
+            "DC3",
+            1942,
+            "4666",
+            11884,
+            28,
+            2,
+            "PRATT & WHITNEY DIVISION", // also checks for "&amp;" -> "&"
+            "R-1830-92",
+            "Global Jet Trading Ltd., Landstrasse 40, 9495 Triesen, P.O. Box 53, Liechtenstein"
+        )
+    }
+
+    @Test
     fun seating0() {
-        assertEquals(0, registrations["HB-2053"]?.aircraftReference?.seats)
+        assertEquals(0, registrations["HB-2053"]?.aircraftReference?.passengerSeats)
     }
 
     @Test
@@ -47,7 +65,7 @@ class ChRegistrationSummaryHtmlParserTest {
     @Test
     fun balloonWithNoEngine() {
         val reg = registrations["HB-QYV"]
-        assertNull(reg?.engineReferences)
+        assertTrue(reg?.engineReferences?.isEmpty() == true)
         assertNull(reg?.aircraftReference?.engines)
         assertEquals(AircraftType.BALLOON, reg?.aircraftReference?.aircraftType)
     }
@@ -205,12 +223,12 @@ class ChRegistrationSummaryHtmlParserTest {
         assertEquals(year, r.aircraftReference.manufactureYear)
         assertEquals(serialNumber, r.aircraftReference.serialNumber)
         assertEquals(Weight(maxTakeOffMassKg, WeightUnit.KILOGRAMS), r.aircraftReference.maxTakeOffMass)
-        assertEquals(seatingCapacity, r.aircraftReference.seats)
+        assertEquals(seatingCapacity, r.aircraftReference.passengerSeats)
         assertEquals(engines, r.aircraftReference.engines)
-        assertEquals(engineManufacturer, r.engineReferences?.get(0)?.manufacturer)
-        assertEquals(engineModel, r.engineReferences?.get(0)?.model)
+        assertEquals(engineManufacturer, r.engineReferences[0].manufacturer)
+        assertEquals(engineModel, r.engineReferences[0].model)
 
-        assertEquals(UnstructuredRegistrant(mainOwner), r.registrant)
-        assertEquals(UnstructuredRegistrant(mainOperator), r.registrant)
+        assertEquals(UnstructuredRegistrant(mainOwner), r.owner)
+        assertEquals(UnstructuredRegistrant(mainOperator), r.operator)
     }
 }

@@ -10,10 +10,10 @@ import java.time.LocalDate
 @Serializable
 data class Registration(
     val registrationId: RegistrationId,
-    val recordId: String?, // there could be multiple records for the same registration number
+    val recordId: String? = null, // there could be multiple records for the same registration number
     val status: RegistrationStatus? = null,
     val aircraftReference: AircraftReference,
-    val engineReferences: List<EngineReference>? = null,
+    val engineReferences: List<EngineReference> = emptyList(),
     val registrantType: RegistrantType? = null,
     val registrant: StructuredRegistrant? = null, // US registry
     val owner: UnstructuredRegistrant? = null, // CH registry
@@ -26,7 +26,7 @@ data class Registration(
     val expirationDate: LocalDate? = null,
     val airworthiness: Airworthiness? = null,
     @Contextual
-    val transponderCode: TransponderCode?,
+    val transponderCode: TransponderCode? = null,
     val fractionalOwnership: Boolean = false,
     val coOwners: List<String> = emptyList()
 ) : Comparable<Registration> {

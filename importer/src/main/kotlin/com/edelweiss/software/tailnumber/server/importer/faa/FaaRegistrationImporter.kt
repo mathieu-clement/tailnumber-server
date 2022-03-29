@@ -103,7 +103,7 @@ class FaaRegistrationImporter(
                     power = it.horsepower?.let { hp -> Power(hp, PowerUnit.SAE_HP) },
                     thrust = it.thrust?.let { thrust -> Thrust(thrust, ThrustUnit.POUNDS) }
                 ))
-            },
+            } ?: emptyList(),
             registrantType = masterRecord.typeRegistrant?.let { RegistrantType.fromFaaCode(it) },
             registrant = parseRegistrant(
                 masterRecord.name,
