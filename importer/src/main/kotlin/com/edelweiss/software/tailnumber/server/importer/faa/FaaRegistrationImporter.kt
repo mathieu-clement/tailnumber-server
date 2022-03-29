@@ -94,14 +94,15 @@ class FaaRegistrationImporter(
                 kitManufacturerName = masterRecord.kitMfr,
                 kitModelName = masterRecord.kitModel
             ),
-            engineReference = engineRecord?.let {
-                EngineReference(
-                    engineType = it.type?.let { EngineType.fromFaaCode(it) },
+            engineReferences = engineRecord?.let {
+                listOf(EngineReference(
+                    count = acftRefRecord?.noEng,
+                    engineType = it.type?.let { type -> EngineType.fromFaaCode(type) },
                     manufacturer = it.mfr,
                     model = it.model,
-                    power = it.horsepower?.let { Power(it, PowerUnit.SAE_HP) },
-                    thrust = it.thrust?.let { Thrust(it, ThrustUnit.POUNDS) }
-                )
+                    power = it.horsepower?.let { hp -> Power(hp, PowerUnit.SAE_HP) },
+                    thrust = it.thrust?.let { thrust -> Thrust(thrust, ThrustUnit.POUNDS) }
+                ))
             },
             registrantType = masterRecord.typeRegistrant?.let { RegistrantType.fromFaaCode(it) },
             registrant = parseRegistrant(
@@ -139,8 +140,8 @@ class FaaRegistrationImporter(
         state: String?,
         country: String?
     ): StructuredRegistrant? =
-        StructuredRegistrant(name, AddressOrString(address = parseAddress(street, street2, city, zipCode, state, country)))
-            .takeIf { it.address?.address != null && it.name != null }
+        StructuredRegistrant(name, parseAddress(street, street2, city, zipCode, state, country))
+            .takeIf { it.address != null && it.name != null }
 
     private fun parseAddress(
         street: String?,

@@ -13,11 +13,11 @@ data class Registration(
     val recordId: String?, // there could be multiple records for the same registration number
     val status: RegistrationStatus? = null,
     val aircraftReference: AircraftReference,
-    val engineReference: EngineReference? = null,
+    val engineReferences: List<EngineReference>? = null,
     val registrantType: RegistrantType? = null,
     val registrant: StructuredRegistrant? = null, // US registry
-    val owner: StructuredRegistrant? = null, // CH registry
-    val operator: StructuredRegistrant? = null, // CH registry
+    val owner: UnstructuredRegistrant? = null, // CH registry
+    val operator: UnstructuredRegistrant? = null, // CH registry
     @Contextual
     val certificateIssueDate: LocalDate? = null,
     @Contextual

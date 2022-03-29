@@ -13,7 +13,8 @@ data class AircraftReference(
     val serialNumber: String,
     val typeCertificated: Boolean?,
     val engines: Int? = null,
-    val seats: Int? = null,
+    val seats: Int? = null, // FAA
+    val passengerSeats: Int? = null, // CH
     @Contextual
     val weightCategory: WeightCategory? = null,
     val maxTakeOffMass: Weight? = null,

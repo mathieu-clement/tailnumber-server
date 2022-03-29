@@ -4,15 +4,19 @@ import org.slf4j.LoggerFactory
 
 enum class AircraftType() {
     GLIDER,
+    POWERED_GLIDER,
     BALLOON,
-    BLIMP_DIRIGIBLE,
+    BLIMP_DIRIGIBLE, // aka Airship
     FIXED_WING_SINGLE_ENGINE,
     FIXED_WING_MULTI_ENGINE,
     ROTORCRAFT,
     WEIGHT_SHIFT_CONTROL,
     POWERED_PARACHUTE,
     GYROPLANE,
+    ULTRALIGHT_GYROPLANE,
+    ULTRALIGHT_3_AXIS_CONTROL,
     HYBRID_LIFT,
+    TRIKE,
     OTHER;
     companion object {
 
