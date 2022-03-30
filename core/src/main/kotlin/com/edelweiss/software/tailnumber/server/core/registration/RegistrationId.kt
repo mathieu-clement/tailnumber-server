@@ -25,7 +25,7 @@ data class RegistrationId(
             val sanitized = tailNumber.replace(" ", "").uppercase().trim()
             return when {
                 sanitized.startsWith("HB") -> if ("-" !in sanitized) "HB-" + sanitized.substring(2) else sanitized
-                sanitized.startsWith("N") -> if ("-" !in sanitized) "N-" + sanitized.substring(1) else sanitized
+                sanitized.startsWith("N") -> sanitized
                 else -> throw CountryNotFoundException("$sanitized*")
             }
         }
