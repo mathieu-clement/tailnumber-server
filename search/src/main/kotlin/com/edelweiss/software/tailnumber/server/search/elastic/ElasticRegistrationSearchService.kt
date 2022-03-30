@@ -10,6 +10,7 @@ import com.edelweiss.software.tailnumber.server.search.elastic.dto.request.searc
 import com.edelweiss.software.tailnumber.server.search.elastic.dto.response.SearchResponse
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.serialization.responseObject
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.security.KeyStore
 
-class RegistrationSearchService : KoinComponent {
+class ElasticRegistrationSearchService : KoinComponent {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -38,6 +39,7 @@ class RegistrationSearchService : KoinComponent {
     private val elasticUser = Config.getString("elastic.user")
     private val elasticPassword = Config.getString("elastic.password")
     private val baseUrl = "https://$elasticHost:$elasticPort/$elasticIndex"
+    private val requestTimeoutMs = Config.getInt("elastic.timeoutMs")
 
     private val partialRegistrationFields = setOf(
         "registrationId.id",
@@ -56,6 +58,13 @@ class RegistrationSearchService : KoinComponent {
         "aircraftReference.manufactureYear"
     )
 
+    private val registrantNameOrAddressSearchFields = listOf("registrant.name",
+        "registrant.address.street1",
+        "registrant.address.street2",
+        "registrant.address.city",
+        "registrant.address.zipCode5",
+        "owner", "operator", "coOwners")
+
     init {
         configureKeystore()
     }
@@ -64,7 +73,10 @@ class RegistrationSearchService : KoinComponent {
      * Returns true if there is a record matching the registration
      */
     fun exists(tailNumber: RegistrationId) : Boolean {
-        val (request, response, result) = Fuel.get("$baseUrl/_doc/${tailNumber.id}").response()
+        val (request, response, result) = Fuel.get("$baseUrl/_doc/${tailNumber.id}")
+            .timeout(requestTimeoutMs)
+            .timeoutRead(requestTimeoutMs)
+            .response()
         return response.statusCode == 200
     }
 
@@ -91,8 +103,7 @@ class RegistrationSearchService : KoinComponent {
         val searchDocJson = json.encodeToString(searchDoc)
         val (request, response, result) = Fuel.post("$baseUrl/_search")
             .jsonBody(searchDocJson)
-            .authentication()
-            .basic(elasticUser, elasticPassword)
+            .configure()
             .responseObject<SearchResponse>(json = json)
 
         val searchResult = result.get()
@@ -131,8 +142,7 @@ class RegistrationSearchService : KoinComponent {
         val searchDocJson = json.encodeToString(searchDoc)
         val (request, response, result) = Fuel.post("$baseUrl/_search")
             .jsonBody(searchDocJson)
-            .authentication()
-            .basic(elasticUser, elasticPassword)
+            .configure()
             .responseObject<SearchResponse>(json = json)
 
         val searchResponse = result.get()
@@ -142,19 +152,22 @@ class RegistrationSearchService : KoinComponent {
     }
 
 
-    fun findByRegistrantNames(names: Set<String>) : List<PartialRegistration> {
+    fun findByRegistrantNameOrAddress(names: Set<String>, countries: Set<Country>) : List<PartialRegistration> {
         // TODO https://kb.objectrocket.com/elasticsearch/how-to-get-unique-values-for-a-field-in-elasticsearch
         val searchDoc = SearchDoc(
-            query = QueryDoc(BooleanQuery(should = names.map {
-                        MustQuery(queryString = QueryString(it, listOf("registrant.name", "owner", "operator", "coOwners")))
-                }.toSet())),
-                fields = partialRegistrationFields,
-                size = 50)
+            query = QueryDoc(
+                BooleanQuery(
+                    should = names.map {
+                        MustQuery(queryString = QueryString(it, registrantNameOrAddressSearchFields, "or"))
+                    }.toSet()
+                            + countries.map { MustQuery(MatchQuery(registrationCountry = it)) }.toSet(),
+            )),
+            fields = partialRegistrationFields,
+            size = 50)
         val searchDocJson = json.encodeToString(searchDoc)
         val (request, response, result) = Fuel.post("$baseUrl/_search")
             .jsonBody(searchDocJson)
-            .authentication()
-            .basic(elasticUser, elasticPassword)
+            .configure()
             .responseObject<SearchResponse>(json = json)
 
         val searchResult = result.get()
@@ -191,8 +204,7 @@ class RegistrationSearchService : KoinComponent {
         val upsertJson = json.encodeToString(UpsertDoc(registration))
         val (_, response, _) = Fuel.post("$baseUrl/_update/${registration.registrationId.id}")
             .jsonBody(upsertJson)
-            .authentication()
-            .basic(elasticUser, elasticPassword)
+            .configure()
             .response()
         check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}: ${String(response.data)}" }
     }
@@ -206,16 +218,22 @@ class RegistrationSearchService : KoinComponent {
         )
         FuelManager.instance.keystore = keyStore
     }
+
+    private fun Request.configure() = apply {
+        timeout(requestTimeoutMs)
+        timeoutRead(requestTimeoutMs)
+        authentication().basic(elasticUser, elasticPassword)
+    }
 }
 
 fun main() {
     startKoin {
         modules(module {
-            single { RegistrationSearchService() }
+            single { ElasticRegistrationSearchService() }
         })
 
-        val service = koin.get<RegistrationSearchService>()
-        val registrations = service.findByRegistrantNames(setOf("BROWNE THOMAS JUAN"))
+        val service = koin.get<ElasticRegistrationSearchService>()
+        val registrations = service.findByRegistrantNameOrAddress(setOf("BROWNE THOMAS JUAN"), setOf(Country.US))
         println(registrations)
 //        val registrants = service.findRegistrants("BROWNE THOMAS JUAN")
 //        println(registrants)

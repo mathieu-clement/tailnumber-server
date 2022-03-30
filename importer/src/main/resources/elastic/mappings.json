@@ -199,7 +199,7 @@
               },
               "street2": {
                 "type": "text",
-                "index": false
+                "index": true
               },
               "zipCode5": {
                 "type": "keyword",
@@ -207,7 +207,7 @@
               },
               "zipCode": {
                 "type": "keyword",
-                "index": false
+                "index": true
               }
             }
           },

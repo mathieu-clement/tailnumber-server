@@ -2,6 +2,7 @@ package com.edelweiss.software.tailnumber.server.api.plugins
 
 import com.edelweiss.software.tailnumber.server.api.models.NotFoundErrorDTO
 import com.edelweiss.software.tailnumber.server.api.services.RegistrationService
+import com.edelweiss.software.tailnumber.server.core.Country
 import com.edelweiss.software.tailnumber.server.core.exceptions.CountryNotFoundException
 import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrantNotFoundException
 import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationsNotFoundException
@@ -24,8 +25,10 @@ fun Application.configureRouting() {
 
     routing {
         get("/registrations") {
-            val names = getRegistrantsParam()
-            call.respond(registrationService.findByRegistrantNames(names.toSet()))
+            val nameOrAddress = getNameOrAddressParam()
+            val countries = getCountriesParam()
+            call.respond(
+                registrationService.findByRegistrantNameOrAddress(nameOrAddress.toSet(), countries.toSet()))
         }
 
         get("/registrations/autocomplete/{prefix}") {
@@ -36,8 +39,8 @@ fun Application.configureRouting() {
         }
 
         get("/registrations/full") {
-            val names = getRegistrantsParam()
-            val partialRegs = registrationService.findByRegistrantNames(names.toSet())
+            val names = getNameOrAddressParam()
+            val partialRegs = registrationService.findByRegistrantNameOrAddress(names.toSet(), emptySet())
             call.respond(registrationService.findByRegistrationIds(partialRegs.map { it.registrationId }))
         }
 
@@ -75,9 +78,17 @@ fun Application.configureRouting() {
     }
 }
 
-private fun PipelineContext<Unit, ApplicationCall>.getRegistrantsParam(): List<String> {
-    val names = call.request.queryParameters["registrants"]?.split(",")
+private fun PipelineContext<Unit, ApplicationCall>.getNameOrAddressParam(): List<String> {
+    val names = call.request.queryParameters["name_or_address"]?.split(",")
     require(names != null && names.isNotEmpty() && names[0].isNotEmpty()) { "Parameter missing or empty" }
     require(names[0] != "*") { "Wildcard is not allowed" }
     return names
+}
+
+private fun PipelineContext<Unit, ApplicationCall>.getCountriesParam(): List<Country> {
+    return call.request.queryParameters["countries"]
+        .takeIf { !it.isNullOrEmpty() }
+        ?.split(",")
+        ?.map { Country.valueOf(it) }
+        ?: emptyList()
 }

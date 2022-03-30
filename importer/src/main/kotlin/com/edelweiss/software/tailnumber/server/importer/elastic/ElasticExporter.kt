@@ -8,7 +8,7 @@ import com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImpo
 import com.edelweiss.software.tailnumber.server.importer.zipcodes.ZipCodeRepository
 import com.edelweiss.software.tailnumber.server.repositories.RegistrationRepository
 import com.edelweiss.software.tailnumber.server.repositories.cassandra.CassandraRegistrationRepository
-import com.edelweiss.software.tailnumber.server.search.elastic.RegistrationSearchService
+import com.edelweiss.software.tailnumber.server.search.elastic.ElasticRegistrationSearchService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -27,7 +27,7 @@ class ElasticExporter : KoinComponent {
     private val faaImporter by inject<RegistrationImporter>(named(Country.US))
     private val chSummaryImporter by inject<RegistrationImporter>(named(Country.CH))
 
-    private val elasticRegistrationService by inject<RegistrationSearchService>()
+    private val elasticRegistrationService by inject<ElasticRegistrationSearchService>()
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -109,7 +109,7 @@ fun main(args: Array<String>) {
             single<RegistrationImporter>(named(Country.US)) { FaaRegistrationImporter(faaBasePath) }
             single<RegistrationImporter>(named(Country.CH)) { ChRegistrationSummaryImporter(chSummaryPath, true) }
             single<RegistrationRepository> { CassandraRegistrationRepository() }
-            single { RegistrationSearchService() }
+            single { ElasticRegistrationSearchService() }
             single { ElasticExporter() }
         })
 
