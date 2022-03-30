@@ -11,6 +11,7 @@ import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
+import com.edelweiss.software.tailnumber.server.importer.ch.ChRegistrationSummaryImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.zipcodes.ZipCodeRepository
 import kotlinx.serialization.encodeToString
@@ -24,11 +25,13 @@ import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.system.measureTimeMillis
 
 class CassandraExporter : KoinComponent {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val faaImporter by inject<RegistrationImporter>(named(Country.US))
+    private val chSummaryImporter by inject<RegistrationImporter>(named(Country.CH))
 
     private val json = Json {
         prettyPrint = false
@@ -40,7 +43,7 @@ class CassandraExporter : KoinComponent {
     private val cassandraPort = Config.getInt("cassandra.contact-point.port")
     private val cassandraDataCenter = Config.getString("cassandra.datacenter")
 
-    fun export(countries: Set<Country> = setOf(Country.US)) {
+    fun export(countries: Set<Country> = Country.values().toSet()) {
         createSession().use { session ->
 //                https://docs.datastax.com/en/developer/java-driver/4.13/manual/core/statements/batch/
 
@@ -55,6 +58,10 @@ class CassandraExporter : KoinComponent {
             val startTime = System.currentTimeMillis()
 
             val registrations: MutableList<Registration> = mutableListOf()
+            if (Country.CH in countries) {
+                logger.info("Exporting CH data")
+                registrations += chSummaryImporter.import()
+            }
             if (Country.US in countries) {
                 logger.info("Exporting FAA data")
                 registrations += faaImporter.import()
@@ -68,22 +75,25 @@ class CassandraExporter : KoinComponent {
 
             val numRegistrations = registrations.size // - offset
 
-            registrations.chunked(1).forEach { chunk: List<Registration> ->
-                val batchBuilder = BatchStatement.builder(DefaultBatchType.LOGGED)
-                chunk.forEach { registration ->
-                    batchBuilder.addStatement(
-                        preparedInsert.bind(
-                            registration.registrationId.country.name,
-                            json.encodeToString(registration),
-                            registration.registrationId.id,
+            val timeMs = measureTimeMillis {
+                registrations.chunked(1).forEach { chunk: List<Registration> ->
+                    val batchBuilder = BatchStatement.builder(DefaultBatchType.LOGGED)
+                    chunk.forEach { registration ->
+                        batchBuilder.addStatement(
+                            preparedInsert.bind(
+                                registration.registrationId.country.name,
+                                json.encodeToString(registration),
+                                registration.registrationId.id,
+                            )
                         )
-                    )
-                }
-                val batch = batchBuilder.build()
-                session.execute(batch)
+                    }
+                    val batch = batchBuilder.build()
+                    session.execute(batch)
 
-                printProgress(startTime, counter.incrementAndGet(), numRegistrations)
+                    printProgress(startTime, counter.incrementAndGet(), numRegistrations)
+                }
             }
+            println("Export finished in ${TimeUnit.MILLISECONDS.toMinutes(timeMs)} min")
         }
     }
 
@@ -126,14 +136,16 @@ class CassandraExporter : KoinComponent {
 }
 
 fun main(args: Array<String>) {
-    require(args.size > 1) { "Usage: CassandraExporter US,CH ReleasableAircraft/" }
+    require(args.size > 1) { "Usage: CassandraExporter US,CH /home/XYZ/tailnumber-data" }
     val countries = args[0].split(",").map { Country.valueOf(it) }.toSet()
-    val faaDataBasePath = args[1]
+    val faaDataBasePath = args[1] + "/faa/ReleasableAircraft"
+    val chSummaryPath = args[1] + "/ch/pubs.html"
 
     startKoin {
         modules(module {
             single { ZipCodeRepository() }
             single<RegistrationImporter>(named(Country.US)) { FaaRegistrationImporter(faaDataBasePath) }
+            single<RegistrationImporter>(named(Country.CH)) { ChRegistrationSummaryImporter(chSummaryPath, true) }
             single { CassandraExporter() }
         })
 

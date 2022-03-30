@@ -11,14 +11,17 @@ enum class RegistrationStatus {
     CANCELLED,
     REVOKED,
     EXPIRED,
-    SALE_REPORTED
+    SALE_REPORTED,
+    // All above: FAA
+
+    REGISTERED // Switzerland
     ;
 
     companion object {
 
         private val logger = LoggerFactory.getLogger(RegistrationStatus::class.java)
 
-        fun fromFaaCode(code: String) : RegistrationStatus? = when (code) {
+        fun fromFaaCode(code: String): RegistrationStatus? = when (code) {
             "A", "M", "N", "S", "T", "V", "X", "1", "8", "14", "15", "24", "25", "26", "28" -> VALID
             "D", "27" -> EXPIRED
             "E" -> REVOKED

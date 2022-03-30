@@ -10,10 +10,11 @@ data class AircraftReference(
     val manufacturer: String? = null,
     val model: String? = null,
     val icaoType: String? = null,
-    val serialNumber: String,
-    val typeCertificated: Boolean?,
+    val serialNumber: String? = null,
+    val typeCertificated: Boolean? = true,
     val engines: Int? = null,
-    val seats: Int? = null,
+    val seats: Int? = null, // FAA
+    val passengerSeats: Int? = null, // CH
     @Contextual
     val weightCategory: WeightCategory? = null,
     val maxTakeOffMass: Weight? = null,

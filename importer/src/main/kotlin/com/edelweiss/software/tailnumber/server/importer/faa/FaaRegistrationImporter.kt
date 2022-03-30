@@ -1,6 +1,5 @@
 package com.edelweiss.software.tailnumber.server.importer.faa
 
-import com.edelweiss.software.tailnumber.server.core.Address
 import com.edelweiss.software.tailnumber.server.core.Country
 import com.edelweiss.software.tailnumber.server.core.aircraft.*
 import com.edelweiss.software.tailnumber.server.core.airworthiness.Airworthiness
@@ -95,17 +94,18 @@ class FaaRegistrationImporter(
                 kitManufacturerName = masterRecord.kitMfr,
                 kitModelName = masterRecord.kitModel
             ),
-            engineReference = engineRecord?.let {
-                EngineReference(
-                    engineType = it.type?.let { EngineType.fromFaaCode(it) },
+            engineReferences = engineRecord?.let {
+                listOf(EngineReference(
+                    count = acftRefRecord?.noEng,
+                    engineType = it.type?.let { type -> EngineType.fromFaaCode(type) },
                     manufacturer = it.mfr,
                     model = it.model,
-                    power = it.horsepower?.let { Power(it, PowerUnit.SAE_HP) },
-                    thrust = it.thrust?.let { Thrust(it, ThrustUnit.POUNDS) }
-                )
-            },
+                    power = it.horsepower?.let { hp -> Power(hp, PowerUnit.SAE_HP) },
+                    thrust = it.thrust?.let { thrust -> Thrust(thrust, ThrustUnit.POUNDS) }
+                ))
+            } ?: emptyList(),
             registrantType = masterRecord.typeRegistrant?.let { RegistrantType.fromFaaCode(it) },
-            owner = parseRegistrant(
+            registrant = parseRegistrant(
                 masterRecord.name,
                 masterRecord.street,
                 masterRecord.street2,
@@ -139,8 +139,8 @@ class FaaRegistrationImporter(
         zipCode: String?,
         state: String?,
         country: String?
-    ): Registrant? =
-        Registrant(name, parseAddress(street, street2, city, zipCode, state, country))
+    ): StructuredRegistrant? =
+        StructuredRegistrant(name, parseAddress(street, street2, city, zipCode, state, country))
             .takeIf { it.address != null && it.name != null }
 
     private fun parseAddress(

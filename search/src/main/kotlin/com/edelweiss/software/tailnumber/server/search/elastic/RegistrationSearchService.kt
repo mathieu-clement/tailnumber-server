@@ -1,12 +1,9 @@
 package com.edelweiss.software.tailnumber.server.search.elastic
 
 import com.edelweiss.software.tailnumber.server.common.Config
-import com.edelweiss.software.tailnumber.server.core.Address
 import com.edelweiss.software.tailnumber.server.core.Country
-import com.edelweiss.software.tailnumber.server.core.registration.PartialRegistration
-import com.edelweiss.software.tailnumber.server.core.registration.Registrant
-import com.edelweiss.software.tailnumber.server.core.registration.Registration
-import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
+import com.edelweiss.software.tailnumber.server.core.exceptions.CountryNotFoundException
+import com.edelweiss.software.tailnumber.server.core.registration.*
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.search.elastic.dto.request.UpsertDoc
 import com.edelweiss.software.tailnumber.server.search.elastic.dto.request.search.*
@@ -35,7 +32,7 @@ class RegistrationSearchService : KoinComponent {
         serializersModule = CoreSerialization.serializersModule
     }
 
-    private val elasticIndex = "registrations"
+    private val elasticIndex = Config.getString("elastic.index.registrations")
     private val elasticHost = Config.getString("elastic.host")
     private val elasticPort = Config.getInt("elastic.port")
     private val elasticUser = Config.getString("elastic.user")
@@ -45,6 +42,8 @@ class RegistrationSearchService : KoinComponent {
     private val partialRegistrationFields = setOf(
         "registrationId.id",
         "registrationId.country",
+        "owner",
+        "operator",
         "registrant.name",
         "registrant.address.street1",
         "registrant.address.street2",
@@ -80,11 +79,52 @@ class RegistrationSearchService : KoinComponent {
     }
      */
 
+    /**
+     * Find up to 20 registrations matching the given prefix (should _not_ include wildcard / "*")
+     */
+    fun autocompleteRegistration(prefix: String) : List<PartialRegistration> {
+        val searchDoc = SearchDoc(
+            query = QueryDoc(prefix = PrefixQuery(registrationIdId = addDash(prefix))),
+            fields = setOf("registrationId.id", "registrationId.country", "aircraftReference.model"),
+            size = 20
+        )
+        val searchDocJson = json.encodeToString(searchDoc)
+        val (request, response, result) = Fuel.post("$baseUrl/_search")
+            .jsonBody(searchDocJson)
+            .authentication()
+            .basic(elasticUser, elasticPassword)
+            .responseObject<SearchResponse>(json = json)
+
+        val searchResult = result.get()
+        return searchResult.hits.hits.mapNotNull { hit ->
+            hit.fields?.let { fields ->
+                PartialRegistration(
+                    registrationId = RegistrationId(fields.registrationIdId, Country.valueOf(fields.registrationIdCountry)),
+                    model = fields.aircraftReferenceModel
+                )
+            }
+        }
+    }
+
+
+    private fun addDash(prefix: String) = when {
+        prefix.length >= 3 -> when {
+            "-" in prefix -> prefix
+            else -> when {
+                prefix.startsWith("HB") -> "HB-" + prefix.substring(2)
+                prefix.startsWith("N") -> "N-" + prefix.substring(1)
+                else -> throw CountryNotFoundException("$prefix*")
+            }
+        }
+        else -> throw IllegalArgumentException("Requires at least 3 characters in prefix")
+    }
+
+
     fun findRegistrants(name: String) : List<String> {
         val searchDoc = SearchDoc(
-            query = QueryDoc(BooleanQuery(setOf(
+            query = QueryDoc(BooleanQuery(should = setOf(
                 MustQuery(match = MatchQuery(registrantName = name))))),
-            fields = setOf("registrant.name"),
+            fields = setOf("registrant.name", "owner", "operator", "coOwners"),
             size = 10
         )
 
@@ -102,12 +142,11 @@ class RegistrationSearchService : KoinComponent {
     }
 
 
-
     fun findByRegistrantNames(names: Set<String>) : List<PartialRegistration> {
         // TODO https://kb.objectrocket.com/elasticsearch/how-to-get-unique-values-for-a-field-in-elasticsearch
         val searchDoc = SearchDoc(
             query = QueryDoc(BooleanQuery(should = names.map {
-                    MustQuery(queryString = QueryString(it, listOf("registrant.name")))
+                        MustQuery(queryString = QueryString(it, listOf("registrant.name", "owner", "operator", "coOwners")))
                 }.toSet())),
                 fields = partialRegistrationFields)
         val searchDocJson = json.encodeToString(searchDoc)
@@ -123,17 +162,25 @@ class RegistrationSearchService : KoinComponent {
                 PartialRegistration(
                     RegistrationId(fields.registrationIdId, Country.valueOf(fields.registrationIdCountry)),
                     fields.aircraftReferenceManufacturer, fields.aircraftReferenceModel, fields.aircraftReferenceManufactureYear,
-                    Registrant(
-                        fields.registrantName,
-                        Address(
-                            fields.registrantAddressStreet1,
-                            fields.registrantAddressStreet2,
-                            fields.registrantAddressCity,
-                            fields.registrantAddressState,
-                            fields.registrantAddressZipCode,
-                            fields.registrationIdCountry
+                    registrant = fields.registrantName?.let { registrantName ->
+                        StructuredRegistrant(
+                            registrantName,
+                            Address(
+                                fields.registrantAddressStreet1,
+                                fields.registrantAddressStreet2,
+                                fields.registrantAddressCity,
+                                fields.registrantAddressState,
+                                fields.registrantAddressZipCode,
+                                fields.registrationIdCountry
+                            )
                         )
-                    )
+                    },
+                    owner = fields.owner?.let { owner ->
+                        UnstructuredRegistrant(owner)
+                    },
+                    operator = fields.operator?.let { operator ->
+                        UnstructuredRegistrant(operator)
+                    }
                 )
             }
         }
