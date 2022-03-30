@@ -18,7 +18,7 @@ import java.time.LocalDate
 fun Application.configureSerialization() {
     install(ContentNegotiation) {
         json(Json {
-            prettyPrint = true
+//            prettyPrint = true
             serializersModule = SerializersModule {
                 contextual(LocalDate::class) { LocalDateSerializer }
                 contextual(WeightCategory::class) { WeightCategorySerializer }

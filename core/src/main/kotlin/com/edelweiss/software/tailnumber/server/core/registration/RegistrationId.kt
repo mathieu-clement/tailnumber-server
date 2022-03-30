@@ -24,8 +24,8 @@ data class RegistrationId(
         fun sanitize(tailNumber: String): String {
             val sanitized = tailNumber.replace(" ", "").uppercase().trim()
             return when {
-                sanitized.startsWith("HB") -> "HB-" + sanitized.substring(2)
-                sanitized.startsWith("N") -> "N-" + sanitized.substring(1)
+                sanitized.startsWith("HB") -> if ("-" !in sanitized) "HB-" + sanitized.substring(2) else sanitized
+                sanitized.startsWith("N") -> if ("-" !in sanitized) "N-" + sanitized.substring(1) else sanitized
                 else -> throw CountryNotFoundException("$sanitized*")
             }
         }

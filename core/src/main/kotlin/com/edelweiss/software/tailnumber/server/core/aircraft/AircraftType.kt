@@ -2,7 +2,7 @@ package com.edelweiss.software.tailnumber.server.core.aircraft
 
 import org.slf4j.LoggerFactory
 
-enum class AircraftType() {
+enum class AircraftType {
     GLIDER,
     POWERED_GLIDER,
     BALLOON,
