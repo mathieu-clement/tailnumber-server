@@ -47,7 +47,8 @@ fun Application.configureRouting() {
 
         get("/registrations/{tailNumber}") {
             val tailNumber = call.parameters["tailNumber"]!!
-            call.respond(registrationService.findByTailNumbers(listOf(tailNumber)))
+            call.respond(registrationService.findByTailNumbers(listOf(tailNumber))
+                .firstOrNull() ?: throw RegistrantNotFoundException(setOf(tailNumber)))
         }
     }
 
