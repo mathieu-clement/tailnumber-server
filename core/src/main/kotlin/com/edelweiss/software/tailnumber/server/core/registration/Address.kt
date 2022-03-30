@@ -10,5 +10,6 @@ data class Address (
     val state: String? = null,
     val zipCode: String? = null,
     val zipCode5: String? = zipCode?.takeIf { it.length >= 5 }?.substring(0, 5),
-    val country: String? = null // ISO 3166-1 alpha-2 code. Do not use enum here because value might not be known.
+    val country: String? = null, // ISO 3166-1 alpha-2 code. Do not use enum here because value might not be known.
+    val uniqueId: Int = hashCode()
 )

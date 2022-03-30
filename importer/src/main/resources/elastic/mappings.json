@@ -45,7 +45,12 @@
           },
           "manufacturer": {
             "type": "text",
-            "index": true
+            "index": true,
+            "fields":  {
+              "raw": {
+                "type": "keyword"
+              }
+            }
           },
           "maxTakeOffMass": {
             "properties": {
@@ -61,7 +66,12 @@
           },
           "model": {
             "type": "text",
-            "index": true
+            "index": true,
+            "fields":  {
+              "raw": {
+                "type": "keyword"
+              }
+            }
           },
           "passengerSeats": {
             "type": "short",
@@ -121,11 +131,21 @@
           },
           "manufacturer": {
             "type": "text",
-            "index": true
+            "index": true,
+            "fields":  {
+              "raw": {
+                "type": "keyword"
+              }
+            }
           },
           "model": {
             "type": "text",
-            "index": true
+            "index": true,
+            "fields":  {
+              "raw": {
+                "type": "keyword"
+              }
+            }
           },
           "power": {
             "properties": {
@@ -167,11 +187,21 @@
       },
       "operator": {
         "type": "text",
-        "store": true
+        "store": true,
+        "fields":  {
+          "raw": {
+            "type": "keyword"
+          }
+        }
       },
       "owner": {
         "type": "text",
-        "store": true
+        "store": true,
+        "fields":  {
+          "raw": {
+            "type": "keyword"
+          }
+        }
       },
       "recordId": {
         "type": "keyword",
@@ -208,12 +238,20 @@
               "zipCode": {
                 "type": "keyword",
                 "index": true
+              },
+              "uniqueId": {
+                "type": "integer"
               }
             }
           },
           "name": {
             "type": "text",
-            "store": true
+            "store": true,
+            "fields":  {
+              "raw": {
+                "type": "keyword"
+              }
+            }
           }
         }
       },

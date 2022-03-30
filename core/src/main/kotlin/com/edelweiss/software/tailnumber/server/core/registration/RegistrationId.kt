@@ -12,15 +12,22 @@ data class RegistrationId(
 ) : Comparable<RegistrationId> {
     companion object {
         fun fromTailNumber(rawId: String) : RegistrationId {
-            val sanitizedId = rawId
-                .replace(" ", "")
-                .replace("-", "")
-            if (rawId.startsWith("N"))
+            val sanitizedId = sanitize(rawId)
+            if (sanitizedId.startsWith("N"))
                 return RegistrationId(sanitizedId, Country.US)
-            else if (rawId.startsWith("HB")) {
+            else if (sanitizedId.startsWith("HB")) {
                 return RegistrationId(sanitizedId, Country.CH)
             }
             throw CountryNotFoundException(rawId)
+        }
+
+        fun sanitize(tailNumber: String): String {
+            val sanitized = tailNumber.replace(" ", "").uppercase().trim()
+            return when {
+                sanitized.startsWith("HB") -> "HB-" + sanitized.substring(2)
+                sanitized.startsWith("N") -> "N-" + sanitized.substring(1)
+                else -> throw CountryNotFoundException("$sanitized*")
+            }
         }
     }
 

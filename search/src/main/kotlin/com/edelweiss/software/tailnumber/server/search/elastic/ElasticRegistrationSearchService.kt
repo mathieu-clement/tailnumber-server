@@ -2,7 +2,6 @@ package com.edelweiss.software.tailnumber.server.search.elastic
 
 import com.edelweiss.software.tailnumber.server.common.Config
 import com.edelweiss.software.tailnumber.server.core.Country
-import com.edelweiss.software.tailnumber.server.core.exceptions.CountryNotFoundException
 import com.edelweiss.software.tailnumber.server.core.registration.*
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.search.elastic.dto.request.UpsertDoc
@@ -65,6 +64,9 @@ class ElasticRegistrationSearchService : KoinComponent {
         "registrant.address.zipCode5",
         "owner", "operator", "coOwners")
 
+    private val exactRegistrantNameOrAddressSearchFields = listOf("registrant.name.raw",
+        "owner.raw", "operator.raw")
+
     init {
         configureKeystore()
     }
@@ -121,11 +123,7 @@ class ElasticRegistrationSearchService : KoinComponent {
     private fun addDash(prefix: String) = when {
         prefix.length >= 3 -> when {
             "-" in prefix -> prefix
-            else -> when {
-                prefix.startsWith("HB") -> "HB-" + prefix.substring(2)
-                prefix.startsWith("N") -> "N-" + prefix.substring(1)
-                else -> throw CountryNotFoundException("$prefix*")
-            }
+            else -> RegistrationId.sanitize(prefix)
         }
         else -> throw IllegalArgumentException("Requires at least 3 characters in prefix")
     }
@@ -152,13 +150,15 @@ class ElasticRegistrationSearchService : KoinComponent {
     }
 
 
-    fun findByRegistrantNameOrAddress(names: Set<String>, country: Country?) : List<PartialRegistration> {
+    fun findByRegistrantNameOrAddress(names: Set<String>, country: Country?, exact: Boolean) : List<PartialRegistration> {
         // TODO https://kb.objectrocket.com/elasticsearch/how-to-get-unique-values-for-a-field-in-elasticsearch
         val searchDoc = SearchDoc(
             query = QueryDoc(
                 BooleanQuery(
                     should = names.map {
-                        MustQuery(queryString = QueryString(it, registrantNameOrAddressSearchFields, "or"))
+                        MustQuery(queryString = QueryString(it,
+                            if (exact) exactRegistrantNameOrAddressSearchFields else registrantNameOrAddressSearchFields,
+                            "or"))
                     }.toSet() ,
                     must = country?.let { setOf(MustQuery(MatchQuery(registrationCountry = it))) },
             )),
@@ -233,7 +233,7 @@ fun main() {
         })
 
         val service = koin.get<ElasticRegistrationSearchService>()
-        val registrations = service.findByRegistrantNameOrAddress(setOf("BROWNE THOMAS JUAN"), Country.US)
+        val registrations = service.findByRegistrantNameOrAddress(setOf("BROWNE THOMAS JUAN"), Country.US, false)
         println(registrations)
 //        val registrants = service.findRegistrants("BROWNE THOMAS JUAN")
 //        println(registrants)

@@ -25,14 +25,16 @@ fun Application.configureRouting() {
 
     routing {
         get("/registrations") {
-            val nameOrAddress = getNameOrAddressParam()
+            val exact = getExact()
+            val nameOrAddress = getNameOrAddressParam(exact)
             call.respond(
-                registrationService.findByRegistrantNameOrAddress(nameOrAddress.toSet(), getCountry()))
+                registrationService.findByRegistrantNameOrAddress(nameOrAddress.toSet(), getCountry(), exact))
         }
 
         get("/registrations/full") {
-            val names = getNameOrAddressParam()
-            val partialRegs = registrationService.findByRegistrantNameOrAddress(names.toSet(), getCountry())
+            val exact = getExact()
+            val names = getNameOrAddressParam(exact)
+            val partialRegs = registrationService.findByRegistrantNameOrAddress(names.toSet(), getCountry(), exact)
             call.respond(registrationService.findByRegistrationIds(partialRegs.map { it.registrationId }))
         }
 
@@ -79,15 +81,19 @@ fun Application.configureRouting() {
     }
 }
 
-private fun PipelineContext<Unit, ApplicationCall>.getNameOrAddressParam(): List<String> {
-    val names = call.request.queryParameters["name_or_address"]?.split(",")
-    require(names != null && names.isNotEmpty() && names[0].isNotEmpty()) { "Parameter missing or empty" }
-    require(names[0] != "*") { "Wildcard is not allowed" }
-    return names
+private fun PipelineContext<Unit, ApplicationCall>.getNameOrAddressParam(exact: Boolean): List<String> {
+    val nameOrAddress = call.request.queryParameters["name_or_address"]!!
+    require(nameOrAddress.isNotEmpty()) { "Parameter missing or empty" }
+    require("*" !in nameOrAddress) { "Wildcard is not allowed" }
+    return if (exact) listOf(nameOrAddress) else nameOrAddress.split(",")
 }
 
 private fun PipelineContext<Unit, ApplicationCall>.getCountry(): Country? {
     return call.request.queryParameters["country"]
         .takeIf { !it.isNullOrEmpty() }
         ?.let { Country.valueOf(it) }
+}
+
+private fun PipelineContext<Unit, ApplicationCall>.getExact(): Boolean {
+    return call.request.queryParameters["exact"].toBoolean()
 }
