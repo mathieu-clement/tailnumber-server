@@ -26,9 +26,14 @@ fun Application.configureRouting() {
     routing {
         get("/registrations") {
             val nameOrAddress = getNameOrAddressParam()
-            val countries = getCountriesParam()
             call.respond(
-                registrationService.findByRegistrantNameOrAddress(nameOrAddress.toSet(), countries.toSet()))
+                registrationService.findByRegistrantNameOrAddress(nameOrAddress.toSet(), getCountry()))
+        }
+
+        get("/registrations/full") {
+            val names = getNameOrAddressParam()
+            val partialRegs = registrationService.findByRegistrantNameOrAddress(names.toSet(), getCountry())
+            call.respond(registrationService.findByRegistrationIds(partialRegs.map { it.registrationId }))
         }
 
         get("/registrations/autocomplete/{prefix}") {
@@ -36,12 +41,6 @@ fun Application.configureRouting() {
             require(prefix.length >= 3) { "Requires at least 3 characters"}
             require("*" !in prefix) { "Wildcard not allowed" }
             call.respond(registrationService.autocompleteRegistrationId(prefix))
-        }
-
-        get("/registrations/full") {
-            val names = getNameOrAddressParam()
-            val partialRegs = registrationService.findByRegistrantNameOrAddress(names.toSet(), emptySet())
-            call.respond(registrationService.findByRegistrationIds(partialRegs.map { it.registrationId }))
         }
 
         get("/registrations/{tailNumber}") {
@@ -85,10 +84,8 @@ private fun PipelineContext<Unit, ApplicationCall>.getNameOrAddressParam(): List
     return names
 }
 
-private fun PipelineContext<Unit, ApplicationCall>.getCountriesParam(): List<Country> {
-    return call.request.queryParameters["countries"]
+private fun PipelineContext<Unit, ApplicationCall>.getCountry(): Country? {
+    return call.request.queryParameters["country"]
         .takeIf { !it.isNullOrEmpty() }
-        ?.split(",")
-        ?.map { Country.valueOf(it) }
-        ?: emptyList()
+        ?.let { Country.valueOf(it) }
 }

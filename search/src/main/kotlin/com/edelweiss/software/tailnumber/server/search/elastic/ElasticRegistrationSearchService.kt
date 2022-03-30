@@ -152,15 +152,15 @@ class ElasticRegistrationSearchService : KoinComponent {
     }
 
 
-    fun findByRegistrantNameOrAddress(names: Set<String>, countries: Set<Country>) : List<PartialRegistration> {
+    fun findByRegistrantNameOrAddress(names: Set<String>, country: Country?) : List<PartialRegistration> {
         // TODO https://kb.objectrocket.com/elasticsearch/how-to-get-unique-values-for-a-field-in-elasticsearch
         val searchDoc = SearchDoc(
             query = QueryDoc(
                 BooleanQuery(
                     should = names.map {
                         MustQuery(queryString = QueryString(it, registrantNameOrAddressSearchFields, "or"))
-                    }.toSet()
-                            + countries.map { MustQuery(MatchQuery(registrationCountry = it)) }.toSet(),
+                    }.toSet() ,
+                    must = country?.let { setOf(MustQuery(MatchQuery(registrationCountry = it))) },
             )),
             fields = partialRegistrationFields,
             size = 50)
@@ -233,7 +233,7 @@ fun main() {
         })
 
         val service = koin.get<ElasticRegistrationSearchService>()
-        val registrations = service.findByRegistrantNameOrAddress(setOf("BROWNE THOMAS JUAN"), setOf(Country.US))
+        val registrations = service.findByRegistrantNameOrAddress(setOf("BROWNE THOMAS JUAN"), Country.US)
         println(registrations)
 //        val registrants = service.findRegistrants("BROWNE THOMAS JUAN")
 //        println(registrants)

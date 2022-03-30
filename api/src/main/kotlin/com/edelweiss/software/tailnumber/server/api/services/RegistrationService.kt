@@ -22,8 +22,9 @@ class RegistrationService : KoinComponent {
     fun findByRegistrationIds(registrationIds: List<RegistrationId>) : List<Registration> =
         registrationRepository.findByRegistrationIds(registrationIds)
 
-    fun findByRegistrantNameOrAddress(names: Set<String>, countries: Set<Country>) : List<PartialRegistration> =
-        searchService.findByRegistrantNameOrAddress(names, countries).ifEmpty { throw RegistrantNotFoundException(names) }
+    fun findByRegistrantNameOrAddress(names: Set<String>, country: Country?) : List<PartialRegistration> =
+        searchService.findByRegistrantNameOrAddress(names, country)
+            .ifEmpty { throw RegistrantNotFoundException(names) }
 
     fun autocompleteRegistrationId(prefix: String) : List<PartialRegistration> =
         searchService.autocompleteRegistration(prefix)
