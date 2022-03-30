@@ -44,12 +44,12 @@ task importFaa(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-task exportFaaToCassandra(type: JavaExec) {
+task exportToCassandra(type: JavaExec) {
     main = 'com.edelweiss.software.tailnumber.server.importer.cassandra.CassandraExporterKt'
     classpath = sourceSets.main.runtimeClasspath
 }
 
-task exportFaaToElasticSearch(type: JavaExec) {
+task exportToElasticSearch(type: JavaExec) {
     main = 'com.edelweiss.software.tailnumber.server.importer.elastic.ElasticExporterKt'
     classpath = sourceSets.main.runtimeClasspath
 }

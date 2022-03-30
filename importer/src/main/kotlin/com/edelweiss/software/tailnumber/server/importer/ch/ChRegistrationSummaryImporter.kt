@@ -9,10 +9,12 @@ import com.edelweiss.software.tailnumber.server.core.engine.EngineReference
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
 import com.edelweiss.software.tailnumber.server.core.registration.UnstructuredRegistrant
+import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import org.apache.commons.text.StringEscapeUtils
+import org.koin.core.component.KoinComponent
 import java.io.File
 
-class ChRegistrationSummaryHtmlParser(val filename: String, private val isExternalFile: Boolean) {
+class ChRegistrationSummaryImporter(val filename: String, private val isExternalFile: Boolean) : RegistrationImporter, KoinComponent {
 
     private val aircraftTypeMappings: Map<String, AircraftType> = mapOf(
         "Powered Glider" to AircraftType.POWERED_GLIDER,
@@ -35,7 +37,7 @@ class ChRegistrationSummaryHtmlParser(val filename: String, private val isExtern
 
     private val attrLineRegex = Regex("<b>.+</b>&#160;.*")
 
-    fun import(): List<Registration> {
+    override fun import(): List<Registration> {
 
         val results: MutableList<Registration> = mutableListOf()
         var aircraftType: AircraftType = AircraftType.OTHER

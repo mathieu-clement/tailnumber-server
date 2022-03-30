@@ -1,2 +1,3 @@
-#!/bin/sh
-rm pub.{txt,html,xml,pdf} pub*.html
+#!/bin/bash
+dir=/home/tailnumber/tailnumber-data/ch
+rm pub.{txt,html,xml,pdf} "$dir"/pub*.html

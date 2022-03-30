@@ -6,15 +6,25 @@ import com.edelweiss.software.tailnumber.server.core.aircraft.Weight
 import com.edelweiss.software.tailnumber.server.core.aircraft.WeightUnit
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.registration.UnstructuredRegistrant
+import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ChRegistrationSummaryHtmlParserTest {
+class ChRegistrationSummaryImporterTest {
 
-    private val parser = ChRegistrationSummaryHtmlParser("pubs.html", false)
-    private val registrations: Map<String, Registration> = parser.import().associateBy { it.registrationId.id }
+    private lateinit var parser : ChRegistrationSummaryImporter
+    private lateinit var registrations: Map<String, Registration>
+
+    @BeforeEach
+    internal fun setUp() {
+        parser = ChRegistrationSummaryImporter("pubs.html", false)
+        registrations = parser.import().associateBy { it.registrationId.id }
+    }
 
     @Test
     fun kow() {
@@ -184,6 +194,18 @@ class ChRegistrationSummaryHtmlParserTest {
             reg.owner?.value
         )
         assertEquals("Edelweiss Air AG, 8058 Zürich, P.O. Box Switzerland", reg.operator?.value)
+    }
+
+    @Test
+    fun json() {
+        val json = Json {
+            prettyPrint = true
+            serializersModule = CoreSerialization.serializersModule
+        }
+        val reg = registrations["HB-KOW"]
+        val result = json.encodeToString(reg) // We just verify it doesn't throw basically
+        assertTrue(result.length > 500)
+        println(result)
     }
 
     // Address related:

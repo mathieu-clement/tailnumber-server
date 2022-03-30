@@ -1,3 +1,4 @@
 #!/bin/sh
 
-pdftohtml -i pub.pdf 1>/dev/null
+dir=/home/tailnumber/tailnumber-data/ch
+pdftohtml -i "$dir"/pub.pdf 1>/dev/null

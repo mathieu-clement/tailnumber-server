@@ -1,7 +1,7 @@
 package com.edelweiss.software.tailnumber.server.importer.ch
 
-import com.edelweiss.software.tailnumber.server.importer.ch.ChRegistrationSummaryHtmlParser.Companion.parseEngines
-import com.edelweiss.software.tailnumber.server.importer.ch.ChRegistrationSummaryHtmlParser.EngineSummary
+import com.edelweiss.software.tailnumber.server.importer.ch.ChRegistrationSummaryImporter.Companion.parseEngines
+import com.edelweiss.software.tailnumber.server.importer.ch.ChRegistrationSummaryImporter.EngineSummary
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
