@@ -148,7 +148,8 @@ class RegistrationSearchService : KoinComponent {
             query = QueryDoc(BooleanQuery(should = names.map {
                         MustQuery(queryString = QueryString(it, listOf("registrant.name", "owner", "operator", "coOwners")))
                 }.toSet())),
-                fields = partialRegistrationFields)
+                fields = partialRegistrationFields,
+                size = 50)
         val searchDocJson = json.encodeToString(searchDoc)
         val (request, response, result) = Fuel.post("$baseUrl/_search")
             .jsonBody(searchDocJson)
