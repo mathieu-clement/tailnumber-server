@@ -68,10 +68,12 @@ fun Application.configureRouting() {
                 else ->
                     call.respond(HttpStatusCode.InternalServerError, "Internal Server Error: ${cause.message}")
             }
-            if (cause !is RegistrationsNotFoundException && cause !is CountryNotFoundException) {
+            if (cause !is RegistrationsNotFoundException &&
+                cause !is CountryNotFoundException &&
+                cause !is RegistrantNotFoundException) {
                 logger.error("API error", cause)
             } else {
-                logger.trace("Casual exception", cause)
+                logger.info("Casual exception: ${cause.message}")
             }
         }
     }
