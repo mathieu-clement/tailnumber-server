@@ -23,20 +23,27 @@ fun Application.configureRouting() {
     val registrationService by inject<RegistrationService>()
 
     routing {
-        get("/registrations/{tailNumber}") {
-            val tailNumber = call.parameters["tailNumber"]!!
-            call.respond(registrationService.findByTailNumbers(listOf(tailNumber)))
-        }
-
         get("/registrations") {
             val names = getRegistrantsParam()
             call.respond(registrationService.findByRegistrantNames(names.toSet()))
+        }
+
+        get("/registrations/autocomplete/{prefix}") {
+            val prefix = call.parameters["prefix"]!!
+            require(prefix.length >= 3) { "Requires at least 3 characters"}
+            require("*" !in prefix) { "Wildcard not allowed" }
+            call.respond(registrationService.autocompleteRegistrationId(prefix))
         }
 
         get("/registrations/full") {
             val names = getRegistrantsParam()
             val partialRegs = registrationService.findByRegistrantNames(names.toSet())
             call.respond(registrationService.findByRegistrationIds(partialRegs.map { it.registrationId }))
+        }
+
+        get("/registrations/{tailNumber}") {
+            val tailNumber = call.parameters["tailNumber"]!!
+            call.respond(registrationService.findByTailNumbers(listOf(tailNumber)))
         }
     }
 

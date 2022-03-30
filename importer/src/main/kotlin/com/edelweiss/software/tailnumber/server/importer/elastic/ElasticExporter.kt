@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
 
-class ElasticExporter() : KoinComponent {
+class ElasticExporter : KoinComponent {
 
     private val faaImporter by inject<RegistrationImporter>(named(Country.US))
     private val chSummaryImporter by inject<RegistrationImporter>(named(Country.CH))

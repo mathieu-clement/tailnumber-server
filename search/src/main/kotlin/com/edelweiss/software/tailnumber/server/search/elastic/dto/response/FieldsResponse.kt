@@ -8,7 +8,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class FieldsResponse(
     @Serializable(with = StringFieldValueUnwrapperSerializer::class)
-    @SerialName("registrant.name") val registrantName: String,
+    @SerialName("registrant.name") val registrantName: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    val owner: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    val operator: String? = null,
 
     @Serializable(with = StringFieldValueUnwrapperSerializer::class)
     @SerialName("registrant.address.street1") val registrantAddressStreet1: String? = null,

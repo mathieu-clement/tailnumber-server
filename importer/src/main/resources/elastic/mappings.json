@@ -1,0 +1,254 @@
+{
+  "mappings": {
+    "properties": {
+      "aircraftReference": {
+        "properties": {
+          "aircraftCategory": {
+            "type": "keyword",
+            "index": false
+          },
+          "aircraftType": {
+            "type": "keyword",
+            "index": true
+          },
+          "cruisingSpeed": {
+            "properties": {
+              "unit": {
+                "type": "keyword",
+                "index": false
+              },
+              "value": {
+                "type": "short",
+                "index": false
+              }
+            }
+          },
+          "engines": {
+            "type": "byte",
+            "index": false
+          },
+          "icaoType": {
+            "type": "keyword",
+            "index": true
+          },
+          "kitManufacturerName": {
+            "type": "text",
+            "index": false
+          },
+          "kitModelName": {
+            "type": "text",
+            "index": false
+          },
+          "manufactureYear": {
+            "type": "short",
+            "index": false
+          },
+          "manufacturer": {
+            "type": "text",
+            "index": true
+          },
+          "maxTakeOffMass": {
+            "properties": {
+              "unit": {
+                "type": "keyword",
+                "index": false
+              },
+              "value": {
+                "type": "integer",
+                "index": false
+              }
+            }
+          },
+          "model": {
+            "type": "text",
+            "index": true
+          },
+          "passengerSeats": {
+            "type": "short",
+            "index": false
+          },
+          "seats": {
+            "type": "short",
+            "index": false
+          },
+          "serialNumber": {
+            "type": "keyword",
+            "index": false
+          },
+          "typeCertificated": {
+            "type": "boolean",
+            "index": true
+          },
+          "weightCategory": {
+            "type": "keyword",
+            "index": false
+          }
+        }
+      },
+      "airworthiness": {
+        "properties": {
+          "airworthinessDate": {
+            "type": "date",
+            "index": true
+          },
+          "approvedOperation": {
+            "type": "keyword",
+            "index": false
+          },
+          "certificateClass": {
+            "type": "keyword",
+            "index": false
+          }
+        }
+      },
+      "certificateIssueDate": {
+        "type": "date",
+        "index": false
+      },
+      "coOwners": {
+        "type": "text",
+        "index": true
+      },
+      "engineReferences": {
+        "properties": {
+          "count": {
+            "type": "byte",
+            "index": false
+          },
+          "engineType": {
+            "type": "keyword",
+            "index": false
+          },
+          "manufacturer": {
+            "type": "text",
+            "index": true
+          },
+          "model": {
+            "type": "text",
+            "index": true
+          },
+          "power": {
+            "properties": {
+              "unit": {
+                "type": "keyword",
+                "index": false
+              },
+              "value": {
+                "type": "integer",
+                "index": false
+              }
+            }
+          },
+          "thrust": {
+            "properties": {
+              "unit": {
+                "type": "keyword",
+                "index": false
+              },
+              "value": {
+                "type": "long",
+                "index": false
+              }
+            }
+          }
+        }
+      },
+      "expirationDate": {
+        "type": "date",
+        "index": false
+      },
+      "fractionalOwnership": {
+        "type": "boolean",
+        "index": false
+      },
+      "lastActivityDate": {
+        "type": "date",
+        "index": false
+      },
+      "operator": {
+        "type": "text",
+        "store": true
+      },
+      "owner": {
+        "type": "text",
+        "store": true
+      },
+      "recordId": {
+        "type": "keyword",
+        "index": false
+      },
+      "registrant": {
+        "properties": {
+          "address": {
+            "properties": {
+              "city": {
+                "type": "text",
+                "index": true
+              },
+              "country": {
+                "type": "keyword",
+                "index": false
+              },
+              "state": {
+                "type": "keyword",
+                "index": false
+              },
+              "street1": {
+                "type": "text",
+                "index": true
+              },
+              "street2": {
+                "type": "text",
+                "index": false
+              },
+              "zipCode5": {
+                "type": "keyword",
+                "index": true
+              },
+              "zipCode": {
+                "type": "keyword",
+                "index": false
+              }
+            }
+          },
+          "name": {
+            "type": "text",
+            "store": true
+          }
+        }
+      },
+      "registrantType": {
+        "type": "keyword",
+        "index": false
+      },
+      "registrationId": {
+        "properties": {
+          "country": {
+            "type": "keyword"
+          },
+          "id": {
+            "type": "keyword",
+            "store": true,
+            "index": true
+          }
+        }
+      },
+      "serialNumber": {
+        "type": "keyword",
+        "index": false
+      },
+      "status": {
+        "type": "keyword",
+        "index": true
+      },
+      "transponderCode": {
+        "properties": {
+          "code": {
+            "type": "long",
+            "index": false
+          }
+        }
+      }
+    }
+  }
+}
