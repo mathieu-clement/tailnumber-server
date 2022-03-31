@@ -213,7 +213,7 @@ class ElasticRegistrationSearchService : KoinComponent {
         val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
         val password = "trustmeimanengineer".toCharArray()
         keyStore.load(
-            File("/Users/mathieuclement/dev/elastic/truststore.jks").inputStream(),
+            File("${System.getProperty("user.home")}/apps/elasticsearch/truststore.jks").inputStream(),
             password
         )
         FuelManager.instance.keystore = keyStore
