@@ -204,19 +204,22 @@ class ElasticRegistrationSearchService : KoinComponent {
 
     fun checkConnection() {
         val path = "$baseUrl/_count"
-        logger.info("Attempting connection to \"$path\"")
+        logger.debug("Attempting connection to \"$path\"")
         val (_, response, result) = Fuel.get(path)
             .configure()
             .responseString()
         val responseString = result.get()
         check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}. Maybe the user/password or CA cert is wrong?. Response: $responseString" }
-        logger.info("Elastic Search Connection OK")
-        logger.info("_count response: $responseString")
+        logger.debug("Elastic Search Connection OK")
+        logger.debug("_count response: $responseString")
     }
 
     fun insertOrUpdate(registration: Registration) {
         val upsertJson = json.encodeToString(UpsertDoc(registration))
-        val (_, response, result) = Fuel.post("$baseUrl/_update/${registration.registrationId.id}")
+        logger.debug("Inserting document $upsertJson")
+        val path = "$baseUrl/_update/${registration.registrationId.id}"
+        logger.debug("Path: $path")
+        val (_, response, result) = Fuel.post(path)
             .jsonBody(upsertJson)
             .configure()
             .responseString()
