@@ -57,26 +57,28 @@ class ElasticRegistrationSearchService : KoinComponent {
         "aircraftReference.manufactureYear"
     )
 
-    private val registrantNameOrAddressSearchFields = listOf("registrant.name",
+    private val registrantNameOrAddressSearchFields = listOf(
+        "registrant.name",
         "registrant.address.street1",
         "registrant.address.street2",
         "registrant.address.city",
         "registrant.address.zipCode5",
-        "owner", "operator", "coOwners")
+        "owner", "operator", "coOwners"
+    )
 
-    private val exactRegistrantNameOrAddressSearchFields = listOf("registrant.name.raw",
-        "owner.raw", "operator.raw")
+    private val exactRegistrantNameOrAddressSearchFields = listOf(
+        "registrant.name.raw",
+        "owner.raw", "operator.raw"
+    )
 
     init {
-        if (elasticHost == "localhost") {
-            configureKeystore()
-        }
+        configureKeystore()
     }
 
     /**
      * Returns true if there is a record matching the registration
      */
-    fun exists(tailNumber: RegistrationId) : Boolean {
+    fun exists(tailNumber: RegistrationId): Boolean {
         val (request, response, result) = Fuel.get("$baseUrl/_doc/${tailNumber.id}")
             .timeout(requestTimeoutMs)
             .timeoutRead(requestTimeoutMs)
@@ -98,7 +100,7 @@ class ElasticRegistrationSearchService : KoinComponent {
     /**
      * Find up to 20 registrations matching the given prefix (should _not_ include wildcard / "*")
      */
-    fun autocompleteRegistration(prefix: String) : List<PartialRegistration> {
+    fun autocompleteRegistration(prefix: String): List<PartialRegistration> {
         val searchDoc = SearchDoc(
             query = QueryDoc(prefix = PrefixQuery(registrationIdId = addDash(prefix))),
             fields = setOf("registrationId.id", "registrationId.country", "aircraftReference.model"),
@@ -114,7 +116,10 @@ class ElasticRegistrationSearchService : KoinComponent {
         return searchResult.hits.hits.mapNotNull { hit ->
             hit.fields?.let { fields ->
                 PartialRegistration(
-                    registrationId = RegistrationId(fields.registrationIdId, Country.valueOf(fields.registrationIdCountry)),
+                    registrationId = RegistrationId(
+                        fields.registrationIdId,
+                        Country.valueOf(fields.registrationIdCountry)
+                    ),
                     model = fields.aircraftReferenceModel
                 )
             }
@@ -131,10 +136,15 @@ class ElasticRegistrationSearchService : KoinComponent {
     }
 
 
-    fun findRegistrants(name: String) : List<String> {
+    fun findRegistrants(name: String): List<String> {
         val searchDoc = SearchDoc(
-            query = QueryDoc(BooleanQuery(should = setOf(
-                MustQuery(match = MatchQuery(registrantName = name))))),
+            query = QueryDoc(
+                BooleanQuery(
+                    should = setOf(
+                        MustQuery(match = MatchQuery(registrantName = name))
+                    )
+                )
+            ),
             fields = setOf("registrant.name", "owner", "operator", "coOwners"),
             size = 10
         )
@@ -152,20 +162,30 @@ class ElasticRegistrationSearchService : KoinComponent {
     }
 
 
-    fun findByRegistrantNameOrAddress(names: Set<String>, country: Country?, exact: Boolean) : List<PartialRegistration> {
+    fun findByRegistrantNameOrAddress(
+        names: Set<String>,
+        country: Country?,
+        exact: Boolean
+    ): List<PartialRegistration> {
         // TODO https://kb.objectrocket.com/elasticsearch/how-to-get-unique-values-for-a-field-in-elasticsearch
         val searchDoc = SearchDoc(
             query = QueryDoc(
                 BooleanQuery(
                     should = names.map {
-                        MustQuery(queryString = QueryString(it,
-                            if (exact) exactRegistrantNameOrAddressSearchFields else registrantNameOrAddressSearchFields,
-                            "or"))
-                    }.toSet() ,
+                        MustQuery(
+                            queryString = QueryString(
+                                it,
+                                if (exact) exactRegistrantNameOrAddressSearchFields else registrantNameOrAddressSearchFields,
+                                "or"
+                            )
+                        )
+                    }.toSet(),
                     must = country?.let { setOf(MustQuery(MatchQuery(registrationCountry = it))) },
-            )),
+                )
+            ),
             fields = partialRegistrationFields,
-            size = 50)
+            size = 50
+        )
         val searchDocJson = json.encodeToString(searchDoc)
         val (request, response, result) = Fuel.post("$baseUrl/_search")
             .jsonBody(searchDocJson)
@@ -177,7 +197,9 @@ class ElasticRegistrationSearchService : KoinComponent {
             hit.fields?.let { fields ->
                 PartialRegistration(
                     RegistrationId(fields.registrationIdId, Country.valueOf(fields.registrationIdCountry)),
-                    fields.aircraftReferenceManufacturer, fields.aircraftReferenceModel, fields.aircraftReferenceManufactureYear,
+                    fields.aircraftReferenceManufacturer,
+                    fields.aircraftReferenceModel,
+                    fields.aircraftReferenceManufactureYear,
                     registrant = fields.registrantName?.let { registrantName ->
                         StructuredRegistrant(
                             registrantName,
@@ -233,10 +255,7 @@ class ElasticRegistrationSearchService : KoinComponent {
         val pathname = "${System.getProperty("user.home")}/apps/elasticsearch/truststore.jks"
         logger.info("Loading keystore from $pathname")
         logger.info("Will be logging in as user $elasticUser")
-        keyStore.load(
-            File(pathname).inputStream(),
-            password
-        )
+        keyStore.load(File(pathname).inputStream(), password)
         FuelManager.instance.keystore = keyStore
     }
 
