@@ -243,6 +243,7 @@ class ElasticRegistrationSearchService : KoinComponent {
     private fun Request.configure() = apply {
         timeout(requestTimeoutMs)
         timeoutRead(requestTimeoutMs)
+        header("Accept", "application/json")
         authentication().basic(elasticUser, elasticPassword)
     }
 }
