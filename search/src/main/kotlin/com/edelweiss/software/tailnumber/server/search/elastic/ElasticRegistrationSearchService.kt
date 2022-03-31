@@ -37,7 +37,6 @@ class ElasticRegistrationSearchService : KoinComponent {
     private val elasticPort = Config.getInt("elastic.port")
     private val elasticUser = Config.getString("elastic.user")
     private val elasticPassword = Config.getString("elastic.password")
-    private val elasticKeystorePassword = Config.getString("elastic.keystore.password")
     private val baseUrl = "https://$elasticHost:$elasticPort/$elasticIndex"
     private val requestTimeoutMs = Config.getInt("elastic.timeoutMs")
 
@@ -221,6 +220,7 @@ class ElasticRegistrationSearchService : KoinComponent {
 
     private fun configureKeystore() {
         val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
+        val elasticKeystorePassword = Config.getString("elastic.keystore.password")
         val password = elasticKeystorePassword.toCharArray()
         val pathname = "${System.getProperty("user.home")}/apps/elasticsearch/truststore.jks"
         logger.info("Loading keystore from $pathname")
