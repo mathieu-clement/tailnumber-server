@@ -206,8 +206,8 @@ class ElasticRegistrationSearchService : KoinComponent {
         val (_, response, result) = Fuel.post("$baseUrl/_update/${registration.registrationId.id}")
             .jsonBody(upsertJson)
             .configure()
-            .response()
-        check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}. Maybe the user/password or CA cert is wrong?" }
+            .responseString()
+        check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}. Maybe the user/password or CA cert is wrong?. Response: ${result.get()}" }
     }
 
     private fun configureKeystore() {
