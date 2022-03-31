@@ -9,7 +9,7 @@
     </appender>
 
     <logger name="com.edelweiss.software.tailnumber.server.search.elastic">
-        <level value="DEBUG"/>
+        <level value="INFO"/>
     </logger>
 
     <root>
