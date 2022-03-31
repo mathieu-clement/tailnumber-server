@@ -32,6 +32,8 @@ class ElasticExporter : KoinComponent {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun export(runInParallel: Boolean = false, countries: Set<Country> = Country.values().toSet()) {
+        elasticRegistrationService.checkConnection()
+
         val counter = AtomicInteger(0)
         val startTime = System.currentTimeMillis()
 
