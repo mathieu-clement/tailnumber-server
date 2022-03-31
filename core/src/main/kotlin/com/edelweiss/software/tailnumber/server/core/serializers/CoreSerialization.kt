@@ -15,34 +15,34 @@ object CoreSerialization {
         polymorphic(AirworthinessOperation::class) {
             subclass(
                 AirworthinessCertificateClass::class,
-                PolymorphicEnumSerializer(AirworthinessCertificateClass.serializer(), true)
+                PolymorphicEnumSerializer(AirworthinessCertificateClass.serializer(), false)
             )
             subclass(
                 StandardAirworthinessOperation::class,
-                PolymorphicEnumSerializer(StandardAirworthinessOperation.serializer(), true)
+                PolymorphicEnumSerializer(StandardAirworthinessOperation.serializer(), false)
             )
             subclass(
                 RestrictedAirworthinessOperation::class,
-                PolymorphicEnumSerializer(RestrictedAirworthinessOperation.serializer(), true)
+                PolymorphicEnumSerializer(RestrictedAirworthinessOperation.serializer(), false)
             )
             subclass(
                 ExperimentalAirworthinessOperation::class, PolymorphicEnumSerializer(
-                    ExperimentalAirworthinessOperation.serializer(), true
+                    ExperimentalAirworthinessOperation.serializer(), false
                 )
             )
             subclass(
                 ProvisionalAirworthinessOperation::class, PolymorphicEnumSerializer(
-                    ProvisionalAirworthinessOperation.serializer(), true
+                    ProvisionalAirworthinessOperation.serializer(), false
                 )
             )
             subclass(
                 SpecialFlightPermitAirworthinessOperation::class, PolymorphicEnumSerializer(
-                    SpecialFlightPermitAirworthinessOperation.serializer(), true
+                    SpecialFlightPermitAirworthinessOperation.serializer(), false
                 )
             )
             subclass(
                 LightSportAirworthinessOperation::class,
-                PolymorphicEnumSerializer(LightSportAirworthinessOperation.serializer(), true)
+                PolymorphicEnumSerializer(LightSportAirworthinessOperation.serializer(), false)
             )
         }
     }

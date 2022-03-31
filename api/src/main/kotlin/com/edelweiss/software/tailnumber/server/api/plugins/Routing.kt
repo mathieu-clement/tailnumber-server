@@ -6,6 +6,7 @@ import com.edelweiss.software.tailnumber.server.core.Country
 import com.edelweiss.software.tailnumber.server.core.exceptions.CountryNotFoundException
 import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrantNotFoundException
 import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationsNotFoundException
+import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -48,7 +49,7 @@ fun Application.configureRouting() {
         get("/registrations/{tailNumber}") {
             val tailNumber = call.parameters["tailNumber"]!!
             call.respond(registrationService.findByTailNumbers(listOf(tailNumber))
-                .firstOrNull() ?: throw RegistrantNotFoundException(setOf(tailNumber)))
+                .firstOrNull() ?: throw RegistrationsNotFoundException(listOf(RegistrationId.fromTailNumber(tailNumber))))
         }
     }
 
