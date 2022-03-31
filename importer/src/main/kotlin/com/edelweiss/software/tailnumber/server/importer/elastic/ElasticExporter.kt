@@ -66,7 +66,7 @@ class ElasticExporter : KoinComponent {
                                 logger.error("10 errors in a row. Stopping.")
                                 throw t
                             } else {
-                                logger.error("Error inserting ercord ${registration.registrationId.id}")
+                                logger.error("Error inserting record ${registration.registrationId.id}")
                                 logger.info(registration.toString())
                             }
                         }
