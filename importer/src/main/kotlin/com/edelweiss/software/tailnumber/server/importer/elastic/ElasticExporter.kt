@@ -52,32 +52,12 @@ class ElasticExporter : KoinComponent {
         if (runInParallel) {
             updateInParallel(registrations, startTime, counter, numRegistrations)
         } else {
-            var globalErrorCount = 0
             val timeMs = measureTimeMillis {
                 registrations
                     .sorted()
                     .forEach { registration ->
-                        if (globalErrorCount == 10) {
-                            logger.error("Too many errors. Stopping updates.")
-                            return
-                        }
-                        var errorCount = 0
-                        while (errorCount < 10) {
-                            try {
-                                elasticRegistrationService.insertOrUpdate(registration)
-                                printProgress(startTime, counter.incrementAndGet(), numRegistrations)
-                                errorCount = 99
-                            } catch (t: Throwable) {
-                                errorCount++
-                                if (errorCount == 10) {
-                                    logger.error("10 errors in a row. Stopping for this record.")
-                                    globalErrorCount++
-                                } else {
-                                    logger.error("Error inserting record ${registration.registrationId.id}: ${t.message}")
-                                    logger.debug(registration.toString())
-                                }
-                            }
-                        }
+                        elasticRegistrationService.insertOrUpdate(registration)
+                        printProgress(registration.registrationId.id, startTime, counter.incrementAndGet(), numRegistrations)
                     }
             }
             println("Export finished in ${TimeUnit.MILLISECONDS.toMinutes(timeMs)} min")
@@ -98,7 +78,12 @@ class ElasticExporter : KoinComponent {
                     async {
                         sublist.forEach { registration ->
                             elasticRegistrationService.insertOrUpdate(registration)
-                            printProgress(startTime, counter.incrementAndGet(), numRegistrations)
+                            printProgress(
+                                registration.registrationId.id,
+                                startTime,
+                                counter.incrementAndGet(),
+                                numRegistrations
+                            )
                         }
                     }
                 }
@@ -106,7 +91,7 @@ class ElasticExporter : KoinComponent {
         }
     }
 
-    private fun printProgress(startTime: Long, counter: Int, numRegistrations: Int) {
+    private fun printProgress(regId: String, startTime: Long, counter: Int, numRegistrations: Int) {
         if (counter % 100 != 0) return
         val currentTime = System.currentTimeMillis()
         val averageMillisPerUpsert = (currentTime - startTime) / counter
@@ -115,7 +100,7 @@ class ElasticExporter : KoinComponent {
         val remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(remainingTimeMillis)
         val remainingSeconds =
             TimeUnit.MILLISECONDS.toSeconds(remainingTimeMillis) - TimeUnit.MINUTES.toSeconds(remainingMinutes)
-        print("\r$counter (${(100 * counter / numRegistrations)} %), $remainingMinutes min $remainingSeconds sec remaining")
+        print("\r$counter (${(100 * counter / numRegistrations)} %), $remainingMinutes min $remainingSeconds sec remaining [$regId]")
     }
 }
 
