@@ -48,6 +48,7 @@ class ElasticExporter : KoinComponent {
         }
 
         val numRegistrations = registrations.size
+        var errorCount = 0
 
         if (runInParallel) {
             updateInParallel(registrations, startTime, counter, numRegistrations)
@@ -56,7 +57,19 @@ class ElasticExporter : KoinComponent {
                 registrations
                     .sorted()
                     .forEach { registration ->
-                        elasticRegistrationService.insertOrUpdate(registration)
+                        try {
+                            elasticRegistrationService.insertOrUpdate(registration)
+                            errorCount = 0
+                        } catch (t: Throwable) {
+                            errorCount++
+                            if (errorCount == 10) {
+                                logger.error("10 errors in a row. Stopping.")
+                                throw t
+                            } else {
+                                logger.error("Error inserting ercord ${registration.registrationId.id}")
+                                logger.info(registration.toString())
+                            }
+                        }
                         printProgress(startTime, counter.incrementAndGet(), numRegistrations)
                     }
             }
