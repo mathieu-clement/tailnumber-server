@@ -69,7 +69,9 @@ class ElasticRegistrationSearchService : KoinComponent {
         "owner.raw", "operator.raw")
 
     init {
-        configureKeystore()
+        if (elasticHost == "localhost") {
+            configureKeystore()
+        }
     }
 
     /**
@@ -223,11 +225,6 @@ class ElasticRegistrationSearchService : KoinComponent {
         val pathname = "${System.getProperty("user.home")}/apps/elasticsearch/truststore.jks"
         logger.info("Loading keystore from $pathname")
         logger.info("Will be logging in as user $elasticUser")
-        if (elasticHost == "localhost" || elasticHost == "0.0.0.0" || elasticHost == "127.0.0.1") {
-            val tlsVersions = "TLSv1,TLSv1.1,TLSv1.2"
-            logger.info("Using localhost for elasticsearch, we'll allow $tlsVersions")
-            System.setProperty("https.protocols", tlsVersions);
-        }
         keyStore.load(
             File(pathname).inputStream(),
             password
