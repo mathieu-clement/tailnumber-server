@@ -102,8 +102,16 @@
             "index": true
           },
           "approvedOperation": {
-            "type": "keyword",
-            "index": false
+            "properties": {
+              "type": {
+                "type": "keyword",
+                "index": false
+              },
+              "value": {
+                "type": "keyword",
+                "index": false
+              }
+            }
           },
           "certificateClass": {
             "type": "keyword",
