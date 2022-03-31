@@ -249,6 +249,8 @@ class ElasticRegistrationSearchService : KoinComponent {
     }
 
     private fun configureKeystore() {
+        if (!Config.getBoolean("elastic.use-keystore")) return
+
         val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
         val elasticKeystorePassword = Config.getString("elastic.keystore.password")
         val password = elasticKeystorePassword.toCharArray()
