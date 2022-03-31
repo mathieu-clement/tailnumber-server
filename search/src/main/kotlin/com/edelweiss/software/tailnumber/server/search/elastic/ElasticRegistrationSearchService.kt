@@ -215,6 +215,7 @@ class ElasticRegistrationSearchService : KoinComponent {
         val password = elasticKeystorePassword.toCharArray()
         val pathname = "${System.getProperty("user.home")}/apps/elasticsearch/truststore.jks"
         logger.info("Loading keystore from $pathname")
+        logger.info("Will be logging in as user $elasticUser")
         keyStore.load(
             File(pathname).inputStream(),
             password
