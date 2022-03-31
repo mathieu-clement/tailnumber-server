@@ -202,7 +202,7 @@ class ElasticRegistrationSearchService : KoinComponent {
     }
 
     fun checkConnection() {
-        val (_, response, result) = Fuel.get("$baseUrl/count")
+        val (_, response, result) = Fuel.get("$baseUrl/_count")
             .configure()
             .responseString()
         check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}. Maybe the user/password or CA cert is wrong?. Response: ${result.get()}" }
