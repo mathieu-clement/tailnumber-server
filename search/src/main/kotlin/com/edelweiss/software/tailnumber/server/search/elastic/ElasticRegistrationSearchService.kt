@@ -207,7 +207,7 @@ class ElasticRegistrationSearchService : KoinComponent {
             .jsonBody(upsertJson)
             .configure()
             .response()
-        check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}: ${String(response.data)}, ${String(result.get())}" }
+        check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}. Maybe the user/password or CA cert is wrong?" }
     }
 
     private fun configureKeystore() {
