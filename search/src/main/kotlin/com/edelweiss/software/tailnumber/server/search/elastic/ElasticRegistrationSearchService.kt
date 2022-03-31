@@ -203,11 +203,11 @@ class ElasticRegistrationSearchService : KoinComponent {
 
     fun insertOrUpdate(registration: Registration) {
         val upsertJson = json.encodeToString(UpsertDoc(registration))
-        val (_, response, _) = Fuel.post("$baseUrl/_update/${registration.registrationId.id}")
+        val (_, response, result) = Fuel.post("$baseUrl/_update/${registration.registrationId.id}")
             .jsonBody(upsertJson)
             .configure()
             .response()
-        check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}: ${String(response.data)}" }
+        check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}: ${String(response.data)}, ${String(result.get())}" }
     }
 
     private fun configureKeystore() {
