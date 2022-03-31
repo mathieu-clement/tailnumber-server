@@ -48,29 +48,36 @@ class ElasticExporter : KoinComponent {
         }
 
         val numRegistrations = registrations.size
-        var errorCount = 0
 
         if (runInParallel) {
             updateInParallel(registrations, startTime, counter, numRegistrations)
         } else {
+            var globalErrorCount = 0
             val timeMs = measureTimeMillis {
                 registrations
                     .sorted()
                     .forEach { registration ->
-                        try {
-                            elasticRegistrationService.insertOrUpdate(registration)
-                            errorCount = 0
-                        } catch (t: Throwable) {
-                            errorCount++
-                            if (errorCount == 10) {
-                                logger.error("10 errors in a row. Stopping.")
-                                throw t
-                            } else {
-                                logger.error("Error inserting record ${registration.registrationId.id}: ${t.message}")
-                                logger.info(registration.toString())
+                        if (globalErrorCount == 10) {
+                            logger.error("Too many errors. Stopping updates.")
+                            return
+                        }
+                        var errorCount = 0
+                        while (errorCount < 10) {
+                            try {
+                                elasticRegistrationService.insertOrUpdate(registration)
+                                printProgress(startTime, counter.incrementAndGet(), numRegistrations)
+                                errorCount = 99
+                            } catch (t: Throwable) {
+                                errorCount++
+                                if (errorCount == 10) {
+                                    logger.error("10 errors in a row. Stopping for this record.")
+                                    globalErrorCount++
+                                } else {
+                                    logger.error("Error inserting record ${registration.registrationId.id}: ${t.message}")
+                                    logger.info(registration.toString())
+                                }
                             }
                         }
-                        printProgress(startTime, counter.incrementAndGet(), numRegistrations)
                     }
             }
             println("Export finished in ${TimeUnit.MILLISECONDS.toMinutes(timeMs)} min")
