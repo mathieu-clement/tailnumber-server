@@ -103,7 +103,12 @@ class ElasticRegistrationSearchService : KoinComponent {
     fun autocompleteRegistration(prefix: String): List<PartialRegistration> {
         val searchDoc = SearchDoc(
             query = QueryDoc(prefix = PrefixQuery(registrationIdId = addDash(prefix))),
-            fields = setOf("registrationId.id", "registrationId.country", "aircraftReference.model"),
+            fields = setOf("registrationId.id", "registrationId.country",
+                "aircraftReference.manufacturer",
+                "aircraftReference.model",
+                "registrant.name",
+                "operator"
+            ),
             size = 20
         )
         val searchDocJson = json.encodeToString(searchDoc)
@@ -120,7 +125,10 @@ class ElasticRegistrationSearchService : KoinComponent {
                         fields.registrationIdId,
                         Country.valueOf(fields.registrationIdCountry)
                     ),
-                    model = fields.aircraftReferenceModel
+                    manufacturer = fields.aircraftReferenceManufacturer,
+                    model = fields.aircraftReferenceModel,
+                    registrant = fields.registrantName?.let { StructuredRegistrant(it, null) },
+                    operator = fields.operator?.let { UnstructuredRegistrant(it) }
                 )
             }
         }
