@@ -33,4 +33,5 @@ dependencies {
 
 application {
     mainClass = 'com.edelweiss.software.tailnumber.server.api.ApiServerKt'
+    applicationDefaultJvmArgs = ["-Xms256m", "-Xmx2g"]
 }
