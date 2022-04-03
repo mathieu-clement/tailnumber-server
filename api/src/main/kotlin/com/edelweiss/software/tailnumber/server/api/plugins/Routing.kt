@@ -24,12 +24,23 @@ fun Application.configureRouting() {
 
     val registrationService by inject<RegistrationService>()
 
+    /*
+    val tailnumberRegexes : List<Regex> = listOf(
+        "N[1-9][0-9]{1,4}", "N[1-9][0-9]{1,3}[A-Z]", "N[1-9][0-9]{1,2}[A-Z]{2}",
+        "HB-?[A-Z0-9]{3,4}"
+    ).map { Regex(it) }
+     */
+    val tailnumberPrefixRegexes : List<Regex> = listOf(
+        "N[1-9][0-9A-Z]+",
+        "HB-?[A-Z0-9]+"
+    ).map { Regex(it) }
+
     routing {
         get("/registrations") {
             val exact = getExact()
             val nameOrAddress = getNameOrAddressParam(exact)
-            call.respond(
-                registrationService.findByRegistrantNameOrAddress(nameOrAddress.toSet(), getCountry(), exact))
+            val country = getCountry()
+            callAutocompleteRegistrant(registrationService, nameOrAddress, country, exact)
         }
 
         get("/registrations/full") {
@@ -43,7 +54,24 @@ fun Application.configureRouting() {
             val prefix = call.parameters["prefix"]!!
             require(prefix.length >= 3) { "Requires at least 3 characters"}
             require("*" !in prefix) { "Wildcard not allowed" }
-            call.respond(registrationService.autocompleteRegistrationId(prefix))
+            callAutocompleteTailNumber(registrationService, prefix)
+        }
+
+        get("/registrations/any/{searchText}") {
+            val searchText = call.parameters["searchText"]!!
+            require(searchText.length >= 3) { "Requires at least 3 characters"}
+            require("*" !in searchText) { "Wildcard not allowed" }
+            val uppercase = searchText.uppercase()
+            val isTailNumber = when {
+                searchText.split(" ").size > 1 -> false
+                tailnumberPrefixRegexes.any { it.matchEntire(uppercase) != null } -> true
+                else -> false
+            }
+            if (isTailNumber) {
+                callAutocompleteTailNumber(registrationService, uppercase)
+            } else {
+                callAutocompleteRegistrant(registrationService, listOf(searchText), null, false)
+            }
         }
 
         get("/registrations/{tailNumber}") {
@@ -81,6 +109,24 @@ fun Application.configureRouting() {
             }
         }
     }
+}
+
+private suspend fun PipelineContext<Unit, ApplicationCall>.callAutocompleteRegistrant(
+    registrationService: RegistrationService,
+    nameOrAddress: List<String>,
+    country: Country?,
+    exact: Boolean
+) {
+    call.respond(
+        registrationService.findByRegistrantNameOrAddress(nameOrAddress.toSet(), country, exact)
+    )
+}
+
+private suspend fun PipelineContext<Unit, ApplicationCall>.callAutocompleteTailNumber(
+    registrationService: RegistrationService,
+    prefix: String
+) {
+    call.respond(registrationService.autocompleteRegistrationId(prefix))
 }
 
 private fun PipelineContext<Unit, ApplicationCall>.getNameOrAddressParam(exact: Boolean): List<String> {
