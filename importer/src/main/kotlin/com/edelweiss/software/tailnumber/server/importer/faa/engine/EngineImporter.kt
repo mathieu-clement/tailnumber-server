@@ -17,6 +17,7 @@ class EngineImporter(filename: String) {
                     parser.getInt("THRUST", row).takeIf { it != 0 }
                 )
             }
+            .filter { it.mfr.lowercase() != "none" && it.model.lowercase() != "none" }
 }
 
 fun main(args: Array<String>) {
