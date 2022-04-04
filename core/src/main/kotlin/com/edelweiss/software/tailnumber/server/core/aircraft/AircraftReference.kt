@@ -1,5 +1,6 @@
 package com.edelweiss.software.tailnumber.server.core.aircraft
 
+import com.edelweiss.software.tailnumber.server.core.registration.TransponderCode
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
@@ -21,5 +22,7 @@ data class AircraftReference(
     val cruisingSpeed: Speed? = null,
     val manufactureYear: Int? = null,
     val kitManufacturerName: String? = null,
-    val kitModelName: String? = null
+    val kitModelName: String? = null,
+    @Contextual
+    val transponderCode: TransponderCode? = null,
 )

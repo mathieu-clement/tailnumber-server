@@ -25,8 +25,6 @@ data class Registration(
     @Contextual
     val expirationDate: LocalDate? = null,
     val airworthiness: Airworthiness? = null,
-    @Contextual
-    val transponderCode: TransponderCode? = null,
     val fractionalOwnership: Boolean = false,
     val coOwners: List<String> = emptyList()
 ) : Comparable<Registration> {

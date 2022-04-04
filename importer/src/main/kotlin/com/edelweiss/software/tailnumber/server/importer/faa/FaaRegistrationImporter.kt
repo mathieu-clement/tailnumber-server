@@ -92,7 +92,8 @@ class FaaRegistrationImporter(
                 cruisingSpeed = acftRefRecord?.speed?.let { Speed(it, SpeedUnit.MPH) }.takeIf { it?.value != 0 },
                 manufactureYear = masterRecord.yearMfr,
                 kitManufacturerName = masterRecord.kitMfr,
-                kitModelName = masterRecord.kitModel
+                kitModelName = masterRecord.kitModel,
+                transponderCode = TransponderCode.fromHex(masterRecord.modeSCodeHex),
             ),
             engineReferences = engineRecord?.let {
                 listOf(EngineReference(
@@ -118,7 +119,6 @@ class FaaRegistrationImporter(
             lastActivityDate = parseDate(masterRecord.lastActionDate),
             expirationDate = parseDate(masterRecord.expirationDate),
             airworthiness = parseAirworthiness(masterRecord.certification, masterRecord.airWorthDate),
-            transponderCode = TransponderCode.fromHex(masterRecord.modeSCodeHex),
             fractionalOwnership = masterRecord.fractOwner == "Y",
             coOwners = parseCoOwners(
                 masterRecord.otherNames1,

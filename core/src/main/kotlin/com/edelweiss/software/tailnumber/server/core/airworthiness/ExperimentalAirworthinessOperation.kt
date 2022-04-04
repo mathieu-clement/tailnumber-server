@@ -13,7 +13,7 @@ enum class ExperimentalAirworthinessOperation : AirworthinessOperation {
     CREW_TRAINING,
     MARKET_SURVEY,
     OPERATING_KIT_BUILT_AIRCRAFT,
-    REG_PRIOR_TO_20080131,
+    REG_PRIOR_TO_2008_01_31,
     OPERATING_LIGHT_SPORT_KIT_BUILT,
     OPERATING_LIGHT_SPORT_21_190,
     UNMANNED_AIRCRAFT_RESEARCH_AND_DEVELOPMENT,
@@ -61,7 +61,7 @@ enum class ExperimentalAirworthinessOperation : AirworthinessOperation {
             "5" -> CREW_TRAINING
             "6" -> MARKET_SURVEY
             "7" -> OPERATING_KIT_BUILT_AIRCRAFT
-            "8A" -> REG_PRIOR_TO_20080131
+            "8A" -> REG_PRIOR_TO_2008_01_31
             "8B" -> OPERATING_LIGHT_SPORT_KIT_BUILT
             "8C" -> OPERATING_LIGHT_SPORT_21_190
             "9A" -> UNMANNED_AIRCRAFT_RESEARCH_AND_DEVELOPMENT
