@@ -10,6 +10,7 @@ data class AircraftReference(
     val aircraftCategory: AircraftCategory? = null,
     val manufacturer: String? = null,
     val model: String? = null,
+    val marketingDesignation: String? = null,
     val icaoType: String? = null,
     val serialNumber: String? = null,
     val typeCertificated: Boolean? = true,
@@ -24,5 +25,5 @@ data class AircraftReference(
     val kitManufacturerName: String? = null,
     val kitModelName: String? = null,
     @Contextual
-    val transponderCode: TransponderCode? = null,
+    val transponderCode: TransponderCode? = null
 )

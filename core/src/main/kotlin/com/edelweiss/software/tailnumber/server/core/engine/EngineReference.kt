@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 data class EngineReference(
     val count: Int?,
     val engineType: EngineType? = null,
-    val manufacturer: String,
-    val model: String,
+    val manufacturer: String?,
+    val model: String?,
     val power: Power? = null,
     val thrust: Thrust? = null
 )

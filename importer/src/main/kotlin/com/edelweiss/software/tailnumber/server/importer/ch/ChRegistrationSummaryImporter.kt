@@ -23,11 +23,11 @@ class ChRegistrationSummaryImporter(val filename: String, private val isExternal
         "Homebuilt Glider" to AircraftType.GLIDER, // in case FOCA fixes their typo
         "Balloon (Gas)" to AircraftType.BALLOON,
         "Balloon (Hot-air)" to AircraftType.BALLOON,
-        "Helicopter" to AircraftType.ROTORCRAFT,
-        "Homebuilt Helicopter" to AircraftType.ROTORCRAFT,
+        "Helicopter" to AircraftType.HELICOPTER,
+        "Homebuilt Helicopter" to AircraftType.HELICOPTER,
         "Aeroplane" to AircraftType.FIXED_WING_SINGLE_ENGINE, // Modified to Multi engine when applicable
         "Homebuilt Airplane" to AircraftType.FIXED_WING_SINGLE_ENGINE,
-        "Airship (Hot-air)" to AircraftType.BLIMP_DIRIGIBLE,
+        "Airship (Hot-air)" to AircraftType.AIRSHIP,
         "Homebuilt Gyrocopter" to AircraftType.GYROPLANE,
         "Ultralight Gyrocopter" to AircraftType.ULTRALIGHT_GYROPLANE,
         "Ecolight" to AircraftType.ECOLIGHT,

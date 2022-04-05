@@ -6,10 +6,10 @@ enum class AircraftType {
     GLIDER,
     POWERED_GLIDER,
     BALLOON,
-    BLIMP_DIRIGIBLE, // aka Airship
+    AIRSHIP, // aka "Blimp/dirigible"
     FIXED_WING_SINGLE_ENGINE,
     FIXED_WING_MULTI_ENGINE,
-    ROTORCRAFT,
+    HELICOPTER, // FAA calls it "Rotorcraft"
     WEIGHT_SHIFT_CONTROL,
     POWERED_PARACHUTE,
     GYROPLANE,
@@ -26,10 +26,10 @@ enum class AircraftType {
         fun fromFaaCode(code: Char) = when(code) {
             '1' -> GLIDER
             '2' -> BALLOON
-            '3' -> BLIMP_DIRIGIBLE
+            '3' -> AIRSHIP
             '4' -> FIXED_WING_SINGLE_ENGINE
             '5' -> FIXED_WING_MULTI_ENGINE
-            '6' -> ROTORCRAFT
+            '6' -> HELICOPTER
             '7' -> WEIGHT_SHIFT_CONTROL
             '8' -> POWERED_PARACHUTE
             '9' -> GYROPLANE

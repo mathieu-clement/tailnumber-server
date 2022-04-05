@@ -115,7 +115,7 @@ class ChRegistrationSummaryImporterTest {
     @Test
     fun airship() {
         val reg = registrations["HB-BVI"]
-        assertEquals(AircraftType.BLIMP_DIRIGIBLE, reg?.aircraftReference?.aircraftType)
+        assertEquals(AircraftType.AIRSHIP, reg?.aircraftReference?.aircraftType)
     }
 
     @Test
@@ -154,7 +154,7 @@ class ChRegistrationSummaryImporterTest {
     @Test
     fun homebuiltHelicopter() {
         val reg = registrations["HB-YFA"]
-        assertEquals(AircraftType.ROTORCRAFT, reg?.aircraftReference?.aircraftType)
+        assertEquals(AircraftType.HELICOPTER, reg?.aircraftReference?.aircraftType)
         assertEquals(false, reg?.aircraftReference?.typeCertificated)
     }
 
