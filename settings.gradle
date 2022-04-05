@@ -5,4 +5,5 @@ include 'registries'
 include 'importer'
 include 'api'
 include 'search'
+include 'extras'
 

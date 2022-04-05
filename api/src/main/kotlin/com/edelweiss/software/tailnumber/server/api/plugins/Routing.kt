@@ -79,6 +79,10 @@ fun Application.configureRouting() {
             call.respond(registrationService.findByTailNumbers(listOf(tailNumber))
                 .firstOrNull() ?: throw RegistrationsNotFoundException(listOf(RegistrationId.fromTailNumber(tailNumber))))
         }
+
+        get("/registrations/{tailNumber}/extras") {
+
+        }
     }
 
     install(StatusPages) {
