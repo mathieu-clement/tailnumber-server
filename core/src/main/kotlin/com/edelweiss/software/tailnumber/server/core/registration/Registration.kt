@@ -15,7 +15,7 @@ data class Registration(
     val aircraftReference: AircraftReference,
     val engineReferences: List<EngineReference> = emptyList(),
     val registrantType: RegistrantType? = null,
-    val registrant: StructuredRegistrant? = null, // US registry
+    val registrant: Registrant? = null, // US registry
     val owner: Registrant? = null, // CH registry
     val operator: Registrant? = null, // CH registry
     @Contextual

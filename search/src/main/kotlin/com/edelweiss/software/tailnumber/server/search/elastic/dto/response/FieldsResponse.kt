@@ -11,17 +11,14 @@ data class FieldsResponse(
     @SerialName("registrant.name") val registrantName: String? = null,
 
     @Serializable(with = StringFieldValueUnwrapperSerializer::class)
-    val owner: String? = null,
-
-    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
-    val operator: String? = null,
-
-    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
     @SerialName("registrant.address.street1") val registrantAddressStreet1: String? = null,
 
     @Serializable(with = StringFieldValueUnwrapperSerializer::class)
     @SerialName("registrant.address.street2") val registrantAddressStreet2: String? = null,
 
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrant.address.poBox") val registrantPoBox: String? = null,
+    
     @Serializable(with = StringFieldValueUnwrapperSerializer::class)
     @SerialName("registrant.address.city") val registrantAddressCity: String? = null,
 
@@ -30,6 +27,57 @@ data class FieldsResponse(
 
     @Serializable(with = StringFieldValueUnwrapperSerializer::class)
     @SerialName("registrant.address.zipCode") val registrantAddressZipCode: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("registrant.address.country") val registrantAddressCountry: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("owner.name") val ownerName: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("owner.address.street1") val ownerAddressStreet1: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("owner.address.street2") val ownerAddressStreet2: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("owner.address.poBox") val ownerPoBox: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("owner.address.city") val ownerAddressCity: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("owner.address.state") val ownerAddressState: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("owner.address.zipCode") val ownerAddressZipCode: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("owner.address.country") val ownerAddressCountry: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("operator.name") val operatorName: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("operator.address.street1") val operatorAddressStreet1: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("operator.address.street2") val operatorAddressStreet2: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("operator.address.poBox") val operatorPoBox: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("operator.address.city") val operatorAddressCity: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("operator.address.state") val operatorAddressState: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("operator.address.zipCode") val operatorAddressZipCode: String? = null,
+
+    @Serializable(with = StringFieldValueUnwrapperSerializer::class)
+    @SerialName("operator.address.country") val operatorAddressCountry: String? = null,
 
     @Serializable(with = StringFieldValueUnwrapperSerializer::class)
     @SerialName("aircraftReference.manufacturer") val aircraftReferenceManufacturer : String? = null,

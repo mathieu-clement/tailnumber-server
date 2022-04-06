@@ -139,8 +139,8 @@ class FaaRegistrationImporter(
         zipCode: String?,
         state: String?,
         country: String?
-    ): StructuredRegistrant? =
-        StructuredRegistrant(name, parseAddress(street, street2, city, zipCode, state, country))
+    ): Registrant? =
+        Registrant(name, parseAddress(street, street2, city, zipCode, state, country))
             .takeIf { it.address != null && it.name != null }
 
     private fun parseAddress(

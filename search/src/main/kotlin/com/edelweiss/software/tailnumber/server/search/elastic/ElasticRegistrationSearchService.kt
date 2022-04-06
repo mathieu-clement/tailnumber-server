@@ -127,8 +127,9 @@ class ElasticRegistrationSearchService : KoinComponent {
                     ),
                     manufacturer = fields.aircraftReferenceManufacturer,
                     model = fields.aircraftReferenceModel,
-                    registrant = fields.registrantName?.let { StructuredRegistrant(it, null) },
-                    operator = fields.operator?.let { UnstructuredRegistrant(it) }
+                    operator = fields.operatorName?.let { Registrant(it, null) },
+                    owner = fields.ownerName?.let { Registrant(it, null) },
+                    registrant = fields.registrantName?.let { Registrant(it, null) },
                 )
             }
         }
@@ -209,23 +210,46 @@ class ElasticRegistrationSearchService : KoinComponent {
                     fields.aircraftReferenceModel,
                     fields.aircraftReferenceManufactureYear,
                     registrant = fields.registrantName?.let { registrantName ->
-                        StructuredRegistrant(
+                        Registrant(
                             registrantName,
                             Address(
                                 fields.registrantAddressStreet1,
                                 fields.registrantAddressStreet2,
+                                fields.registrantPoBox,
                                 fields.registrantAddressCity,
                                 fields.registrantAddressState,
                                 fields.registrantAddressZipCode,
-                                fields.registrationIdCountry
+                                country = fields.registrantAddressCountry
                             )
                         )
                     },
-                    owner = fields.owner?.let { owner ->
-                        UnstructuredRegistrant(owner)
+                    owner = fields.ownerName?.let { ownerName ->
+                        Registrant(
+                            ownerName,
+                            Address(
+                                fields.ownerAddressStreet1,
+                                fields.ownerAddressStreet2,
+                                fields.ownerPoBox,
+                                fields.ownerAddressCity,
+                                fields.ownerAddressState,
+                                fields.ownerAddressZipCode,
+                                country = fields.ownerAddressCountry
+                            )
+                        )
                     },
-                    operator = fields.operator?.let { operator ->
-                        UnstructuredRegistrant(operator)
+                    operator = fields.operatorName?.let { operatorName ->
+                        Registrant(
+                            operatorName,
+                            Address(
+                                fields.operatorAddressStreet1,
+                                fields.operatorAddressStreet2,
+                                fields.operatorPoBox,
+                                fields.operatorAddressCity,
+                                fields.operatorAddressState,
+                                fields.operatorAddressZipCode,
+                                country = fields.operatorAddressCountry
+                            )
+                        )
                     }
                 )
             }

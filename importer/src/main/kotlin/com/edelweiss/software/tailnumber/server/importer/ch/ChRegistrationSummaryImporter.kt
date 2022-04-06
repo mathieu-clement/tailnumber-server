@@ -6,9 +6,9 @@ import com.edelweiss.software.tailnumber.server.core.aircraft.AircraftType
 import com.edelweiss.software.tailnumber.server.core.aircraft.Weight
 import com.edelweiss.software.tailnumber.server.core.aircraft.WeightUnit
 import com.edelweiss.software.tailnumber.server.core.engine.EngineReference
+import com.edelweiss.software.tailnumber.server.core.registration.Registrant
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
-import com.edelweiss.software.tailnumber.server.core.registration.UnstructuredRegistrant
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import org.apache.commons.text.StringEscapeUtils
 import org.koin.core.component.KoinComponent
@@ -193,8 +193,12 @@ class ChRegistrationSummaryImporter(val filename: String, private val isExternal
                     model = it.model
                 )
             },
-            owner = mainOwner?.let { UnstructuredRegistrant(it) },
-            operator = mainOperator?.let { UnstructuredRegistrant(it) },
+            owner = mainOwner?.let { toRegistrant(it) },
+            operator = mainOperator?.let { toRegistrant(it) },
+        )
+
+        private fun toRegistrant(ownerOrOperator: String) = Registrant(
+
         )
     }
 

@@ -193,27 +193,113 @@
         "type": "date",
         "index": false
       },
+      "recordId": {
+        "type": "keyword",
+        "index": false
+      },
       "operator": {
-        "type": "text",
-        "store": true,
-        "fields":  {
-          "raw": {
-            "type": "keyword"
+        "properties": {
+          "address": {
+            "properties": {
+              "city": {
+                "type": "text",
+                "index": true
+              },
+              "country": {
+                "type": "keyword",
+                "index": false
+              },
+              "poBox": {
+                "type": "poBox",
+                "index": false
+              },
+              "state": {
+                "type": "keyword",
+                "index": false
+              },
+              "street1": {
+                "type": "text",
+                "index": true
+              },
+              "street2": {
+                "type": "text",
+                "index": true
+              },
+              "zipCode5": {
+                "type": "keyword",
+                "index": true
+              },
+              "zipCode": {
+                "type": "keyword",
+                "index": true
+              },
+              "uniqueId": {
+                "type": "integer"
+              }
+            }
+          },
+          "name": {
+            "type": "text",
+            "store": true,
+            "fields":  {
+              "raw": {
+                "type": "keyword"
+              }
+            }
           }
         }
       },
       "owner": {
-        "type": "text",
-        "store": true,
-        "fields":  {
-          "raw": {
-            "type": "keyword"
+        "properties": {
+          "address": {
+            "properties": {
+              "city": {
+                "type": "text",
+                "index": true
+              },
+              "country": {
+                "type": "keyword",
+                "index": false
+              },
+              "poBox": {
+                "type": "poBox",
+                "index": false
+              },
+              "state": {
+                "type": "keyword",
+                "index": false
+              },
+              "street1": {
+                "type": "text",
+                "index": true
+              },
+              "street2": {
+                "type": "text",
+                "index": true
+              },
+              "zipCode5": {
+                "type": "keyword",
+                "index": true
+              },
+              "zipCode": {
+                "type": "keyword",
+                "index": true
+              },
+              "uniqueId": {
+                "type": "integer"
+              }
+            }
+          },
+          "name": {
+            "type": "text",
+            "store": true,
+            "fields":  {
+              "raw": {
+                "type": "keyword"
+              }
+            }
           }
         }
-      },
-      "recordId": {
-        "type": "keyword",
-        "index": false
       },
       "registrant": {
         "properties": {
@@ -225,6 +311,10 @@
               },
               "country": {
                 "type": "keyword",
+                "index": false
+              },
+              "poBox": {
+                "type": "poBox",
                 "index": false
               },
               "state": {

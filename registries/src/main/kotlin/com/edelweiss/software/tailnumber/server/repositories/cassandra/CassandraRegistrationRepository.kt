@@ -7,6 +7,7 @@ import com.edelweiss.software.tailnumber.server.common.Config
 import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationsNotFoundException
 import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
+import com.edelweiss.software.tailnumber.server.core.registration.RegistrationResult
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.repositories.RegistrationRepository
 import kotlinx.serialization.decodeFromString
@@ -28,7 +29,7 @@ class CassandraRegistrationRepository : RegistrationRepository {
     private val cassandraPort = Config.getInt("cassandra.contact-point.port")
     private val cassandraDataCenter = Config.getString("cassandra.datacenter")
 
-    override fun findByRegistrationIds(registrationIds: List<RegistrationId>): List<Registration> =
+    override fun findByRegistrationIds(registrationIds: List<RegistrationId>): List<RegistrationResult> =
         getSession().let { session ->
             val select = QueryBuilder.selectFrom("registrations")
                 .column("record")
@@ -36,7 +37,10 @@ class CassandraRegistrationRepository : RegistrationRepository {
                 .build()
             val resultSet = session.execute(select)
             return resultSet.map { row ->
-                json.decodeFromString<Registration>(row.getString("record")!!)
+                RegistrationResult(
+                    row.getLocalDate("lastUpdate"),
+                    json.decodeFromString<Registration>(row.getString("record")!!)
+                )
             }.toList()
                 .ifEmpty { throw RegistrationsNotFoundException(registrationIds) }
         }

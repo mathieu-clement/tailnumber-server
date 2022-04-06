@@ -8,7 +8,7 @@ data class PartialRegistration(
     val manufacturer: String? = null,
     val model: String? = null,
     val year: Int? = null,
-    val registrant: StructuredRegistrant? = null,
-    val owner: UnstructuredRegistrant? = null,
-    val operator: UnstructuredRegistrant? = null
+    val registrant: Registrant? = null,
+    val owner: Registrant? = null,
+    val operator: Registrant? = null
 )

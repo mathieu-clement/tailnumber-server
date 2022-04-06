@@ -183,7 +183,7 @@ class ChRegistrationEnhancer {
             ?.firstOrNull { it.holderCategory.categoryNames.en == registrantType }
             ?.let { toStructuredRegistrant(it) }
 
-    private fun toStructuredRegistrant(o: OwnerOperator) = StructuredRegistrant(
+    private fun toStructuredRegistrant(o: OwnerOperator) = Registrant(
         name = o.ownerOperator,
         address = o.address?.let { addr ->
             val streetWithHouseNumber = addr.street?.let { street ->

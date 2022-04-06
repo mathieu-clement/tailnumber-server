@@ -23,6 +23,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
@@ -50,7 +51,7 @@ class CassandraExporter : KoinComponent {
             // TODO We could do a live update by deleting records that have disappeared and update those that still exist
 
             val preparedInsert: PreparedStatement = session.prepare(
-                "UPDATE registrations SET country = :country, record = :record " +
+                "UPDATE registrations SET country = :country, lastUpdate= :lastUpdate, record = :record " +
                         "WHERE id = :id"
             )
 
@@ -74,6 +75,7 @@ class CassandraExporter : KoinComponent {
             if (deletedRegistrationIds.isNotEmpty()) delete(deletedRegistrationIds, session)
 
             val numRegistrations = registrations.size // - offset
+            val lastUpdate = LocalDate.now()
 
             val timeMs = measureTimeMillis {
                 registrations.chunked(1).forEach { chunk: List<Registration> ->
@@ -82,6 +84,7 @@ class CassandraExporter : KoinComponent {
                         batchBuilder.addStatement(
                             preparedInsert.bind(
                                 registration.registrationId.country.name,
+                                lastUpdate,
                                 json.encodeToString(registration),
                                 registration.registrationId.id,
                             )

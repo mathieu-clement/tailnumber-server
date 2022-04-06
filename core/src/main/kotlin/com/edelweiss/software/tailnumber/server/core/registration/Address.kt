@@ -13,4 +13,18 @@ data class Address (
     val zipCode5: String? = zipCode?.takeIf { it.length >= 5 }?.substring(0, 5),
     val country: String? = null, // ISO 3166-1 alpha-2 code. Do not use enum here because value might not be known.
     val uniqueId: Int = hashCode()
-)
+) {
+    val cityAndState = when {
+        city != null && state != null -> "$city $state"
+        city != null -> city
+        state != null -> state
+        else -> null
+    }
+
+    override fun toString(): String {
+        val postZip = listOf(street1, street2, poBox, cityAndState, zipCode, country)
+        val preZip = listOf(street1, street2, poBox, zipCode, cityAndState, country)
+        val components = if (country == "CH") preZip else postZip
+        return components.filterNotNull().joinToString(", ")
+    }
+}
