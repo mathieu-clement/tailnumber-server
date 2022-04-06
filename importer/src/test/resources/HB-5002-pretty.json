@@ -1,0 +1,154 @@
+[
+  {
+    "lfrId": "1122144",
+    "status": "Registered",
+    "registration": "HB-5002",
+    "aircraftModelType": "SINUS",
+    "icaoCode": "PISI",
+    "manufacturer": "PIPISTREL D.O.O.",
+    "ownerOperators": [
+      {
+        "holderId": "1351100",
+        "holderCategory": {
+          "catId": "-11120140001",
+          "categoryNames": {
+            "de": "Haupteigentümer",
+            "en": "Main Owner",
+            "it": "Proprietario principale",
+            "fr": "Propriétaire principal"
+          }
+        },
+        "ownerOperator": "Bösch, Donat",
+        "address": {
+          "city": "Balzers",
+          "country": "Switzerland",
+          "poBox": "N/A",
+          "poBoxName": "N/A",
+          "street": "Taleze",
+          "streetNo": "38",
+          "extraLine": "N/A",
+          "zipCode": "9496",
+          "empty": false
+        },
+        "billingAddress": {
+          "city": "Balzers",
+          "country": "Switzerland",
+          "poBox": "N/A",
+          "poBoxName": "N/A",
+          "street": "Taleze",
+          "streetNo": "38",
+          "extraLine": "N/A",
+          "zipCode": "9496",
+          "empty": false
+        }
+      },
+      {
+        "holderId": "1351101",
+        "holderCategory": {
+          "catId": "-11120140002",
+          "categoryNames": {
+            "de": "Haupthalter",
+            "en": "Main Operator",
+            "it": "Titolare principale",
+            "fr": "Exploitant principal"
+          }
+        },
+        "ownerOperator": "Bösch, Donat",
+        "address": {
+          "city": "Balzers",
+          "country": "Switzerland",
+          "poBox": "N/A",
+          "poBoxName": "N/A",
+          "street": "Taleze",
+          "streetNo": "38",
+          "extraLine": "N/A",
+          "zipCode": "9496",
+          "empty": false
+        },
+        "billingAddress": {
+          "city": "Balzers",
+          "country": "Switzerland",
+          "poBox": "N/A",
+          "poBoxName": "N/A",
+          "street": "Taleze",
+          "streetNo": "38",
+          "extraLine": "N/A",
+          "zipCode": "9496",
+          "empty": false
+        }
+      }
+    ],
+    "details": {
+      "marketing": "N/A",
+      "certificationBasis": "LTF-UL & FOCA additional requirements",
+      "airworthinessCat": [
+        "Special Category: Ecolight"
+      ],
+      "ela": "N/A",
+      "eltCode": null,
+      "yearOfManufacture": "2008",
+      "serialNumber": "246SLCH912",
+      "numCrewPax": "1",
+      "minCrew": "1",
+      "mtom": "472.5",
+      "brs": "false",
+      "engines": [
+        {
+          "engineManufacturer": "BRP-ROTAX GMBH & CO KG",
+          "name": "ROTAX 912 UL",
+          "count": "1",
+          "manEndDate": "2009-02-02T00:00:00+01:00"
+        }
+      ],
+      "propellers": [
+        {
+          "propellerManuafacturer": "PIPISTREL D.O.O.",
+          "count": "1",
+          "propellerType": "VARIO",
+          "manEndDate": "N/A"
+        }
+      ],
+      "noiseClass": "D",
+      "noiseStandard": "ICAO Annex 16, Vol. 1, Chapter 10",
+      "noiseLevel": "61.2 dB(A)",
+      "regDate": [
+        2008,
+        5,
+        26
+      ],
+      "deregDate": null,
+      "aircraftLegalBasis": "Non-EASA",
+      "tcds": [
+        "573/04-05 1"
+      ],
+      "ownership": "Schweiz",
+      "aircraftAddresses": {
+        "dec": "4937777",
+        "hex": "4b5831",
+        "bin": "010010110101100000110001",
+        "oct": "22654061"
+      }
+    },
+    "aircraftCategories": {
+      "catId": "400007",
+      "aircraftCategoryTranslations": [
+        {
+          "catId": "400007",
+          "text": "Ecolight",
+          "lang": "fr"
+        },
+        {
+          "catId": "400007",
+          "text": "Ecolight",
+          "lang": "en"
+        },
+        {
+          "catId": "400007",
+          "text": "Ecolight",
+          "lang": "de"
+        }
+      ]
+    },
+    "rescuePdfAvailable": false
+  }
+]

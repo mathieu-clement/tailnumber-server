@@ -6,6 +6,7 @@ import com.edelweiss.software.tailnumber.server.core.aircraft.AircraftType
 import com.edelweiss.software.tailnumber.server.core.aircraft.Weight
 import com.edelweiss.software.tailnumber.server.core.aircraft.WeightUnit
 import com.edelweiss.software.tailnumber.server.core.engine.EngineReference
+import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationsNotFoundException
 import com.edelweiss.software.tailnumber.server.core.registration.*
 import com.edelweiss.software.tailnumber.server.importer.ch.models.ChRegistrationStatus
 import com.edelweiss.software.tailnumber.server.importer.ch.models.request.QueryProperties
@@ -42,9 +43,12 @@ class ChRegistrationEnhancer {
         val records: List<RegistryRecord> = jsonArray.map {
             json.decodeFromJsonElement(RegistryRecord.serializer(), it)
         }
+        if (records.isEmpty()) {
+            throw RegistrationsNotFoundException(listOf(registrationId))
+        }
         check(records.isNotEmpty()) { "No result for ${registrationId.id}" }
         val record = records.firstOrNull() { it.registration == registrationId.id }
-            ?: throw NoSuchElementException("No record for $registrationId")
+            ?: throw RegistrationsNotFoundException(listOf(registrationId))
         return toRegistration(record)
     }
 
@@ -93,11 +97,20 @@ class ChRegistrationEnhancer {
                                 entryOpt?.let { entry ->
                                     if (!entry.isDirectory) {
                                         if (entry.isFile) {
-                                            val rawId = entry.name.split(".")[0].split("JSON/", ignoreCase = true)[1]
+                                            // Entry will have a name such as "JSON/HB-123.json"
+                                            // so we try to find the part after the slash and between the dot
+                                            val rawId = entry.name.split(".")[0].split("/", ignoreCase = true)[1]
                                             val registrationId = RegistrationId.fromTailNumber(rawId)
-                                            val registration =
-                                                fetchRegistration(registrationId, input = String(i.readBytes()))
-                                            results[registrationId] = registration
+                                            val str = String(i.readBytes())
+                                            try {
+                                                val registration =
+                                                    fetchRegistration(registrationId, input = str)
+                                                results[registrationId] = registration
+                                            } catch (rnf: RegistrationsNotFoundException) {
+                                                logger.warn("Registration not found: $registrationId")
+                                            } catch (t: Throwable) {
+                                                logger.error("Error processing $registrationId: ${t.message}", t)
+                                            }
                                         }
                                     }
                                 }
@@ -140,7 +153,7 @@ class ChRegistrationEnhancer {
                 seats = null,
                 passengerSeats = record.details?.numCrewPax,
                 weightCategory = null,
-                maxTakeOffMass = record.details?.mtom?.let { Weight(it, WeightUnit.KILOGRAMS) },
+                maxTakeOffMass = record.details?.mtom?.let { Weight(it.toInt(), WeightUnit.KILOGRAMS) },
                 cruisingSpeed = null,
                 manufactureYear = record.details?.yearOfManufacture,
                 kitManufacturerName = null,

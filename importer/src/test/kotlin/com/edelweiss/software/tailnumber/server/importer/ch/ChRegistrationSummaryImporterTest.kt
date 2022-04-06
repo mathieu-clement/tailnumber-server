@@ -180,8 +180,8 @@ class ChRegistrationSummaryImporterTest {
     @Test
     fun bermuda() {
         val reg = registrations["HB-JRJ"]!!
-        assertTrue("Bermuda" in reg.owner?.value!!)
-        assertTrue("Jet Aviation Zurich-Airport AG" in reg.operator?.value!!)
+        assertTrue("Bermuda" in (reg.owner as? UnstructuredRegistrant)?.value!!)
+        assertTrue("Jet Aviation Zurich-Airport AG" in (reg.operator as? UnstructuredRegistrant)?.value!!)
     }
 
     @Test
@@ -191,9 +191,9 @@ class ChRegistrationSummaryImporterTest {
             "International Lease Finance, Corporation (ILFC), " +
                     "c/o Froriep Renggli / Frau Dunja Koch, " +
                     "Bellerivestrasse 201, 8032 Zürich, Switzerland",
-            reg.owner?.value
+            (reg.owner as? UnstructuredRegistrant)?.value
         )
-        assertEquals("Edelweiss Air AG, 8058 Zürich, P.O. Box Switzerland", reg.operator?.value)
+        assertEquals("Edelweiss Air AG, 8058 Zürich, P.O. Box Switzerland", (reg.operator as? UnstructuredRegistrant)?.value)
     }
 
     @Test

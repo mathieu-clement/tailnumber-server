@@ -12,9 +12,9 @@ internal data class Details(
     val eltCode: EltCode?,
     val yearOfManufacture: Int?,
     val serialNumber: String?,
-    val numCrewPax: Int?,
-    val minCrew: Int?,
-    val mtom: Int?, // maximum take-off mass
+    @Serializable(with = NAIntSerializer::class) val numCrewPax: Int?,
+    @Serializable(with = NAIntSerializer::class) val minCrew: Int?,
+    val mtom: Double?, // maximum take-off mass
     val brs: Boolean?, // "false" => requires isLenient=true
     val engines: List<Engine>?,
     val propellers: List<Propeller>?,

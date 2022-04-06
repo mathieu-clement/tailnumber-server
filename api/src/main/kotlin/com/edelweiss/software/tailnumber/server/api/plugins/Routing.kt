@@ -27,7 +27,7 @@ fun Application.configureRouting() {
     /*
     val tailnumberRegexes : List<Regex> = listOf(
         "N[1-9][0-9]{1,4}", "N[1-9][0-9]{1,3}[A-Z]", "N[1-9][0-9]{1,2}[A-Z]{2}",
-        "HB-?[A-Z0-9]{3,4}"
+        "HB-?[A-Z0-9]{3,5}"
     ).map { Regex(it) }
      */
     val tailnumberPrefixRegexes : List<Regex> = listOf(

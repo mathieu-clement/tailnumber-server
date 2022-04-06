@@ -3,9 +3,9 @@ package com.edelweiss.software.tailnumber.server.importer.ch.models.response
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class AircraftAddresses (
-    val dec: String,
-    val hex: String,
-    val bin: String,
-    val oct: String
+internal data class AircraftAddresses(
+    @Serializable(with = NAStringSerializer::class) val dec: String?,
+    @Serializable(with = NAStringSerializer::class) val hex: String?,
+    @Serializable(with = NAStringSerializer::class) val bin: String?,
+    @Serializable(with = NAStringSerializer::class) val oct: String?
 )
