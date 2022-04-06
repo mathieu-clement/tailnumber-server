@@ -14,10 +14,17 @@ import com.edelweiss.software.tailnumber.server.importer.ch.models.response.Owne
 import com.edelweiss.software.tailnumber.server.importer.ch.models.response.RegistryRecord
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
-import com.github.kittinunf.fuel.serialization.responseObject
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import org.slf4j.LoggerFactory
+import java.io.BufferedInputStream
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+
 
 class ChRegistrationEnhancer {
 
@@ -28,23 +35,79 @@ class ChRegistrationEnhancer {
         isLenient = true
     }
 
-    fun fetchRegistration(registrationId: RegistrationId): Registration {
+    fun fetchRegistration(registrationId: RegistrationId, input: String): Registration {
+//        val input = loadJsonRecordFromDisk(registrationId)
+        val jsonArray = json.decodeFromString(JsonArray.serializer(), input)
+
+        val records: List<RegistryRecord> = jsonArray.map {
+            json.decodeFromJsonElement(RegistryRecord.serializer(), it)
+        }
+        check(records.isNotEmpty()) { "No result for ${registrationId.id}" }
+        val record = records.firstOrNull() { it.registration == registrationId.id }
+            ?: throw NoSuchElementException("No record for $registrationId")
+        return toRegistration(record)
+    }
+
+    fun writeToFile(registrationId: RegistrationId) {
+        val basePath = "${System.getProperty("user.home")}/tailnumber-data/ch/json"
+        val directory = File(basePath)
+        directory.mkdir()
+
+        val filename = "$basePath/${registrationId.id}.json"
+        File(filename).bufferedWriter().use { writer ->
+            writer.write(downloadJsonRecord(registrationId))
+        }
+    }
+
+    private fun downloadJsonRecord(registrationId: RegistrationId): String {
         val requestBody = json.encodeToString(
             RegistryRequest.serializer(),
             RegistryRequest(QueryProperties(registration = registrationId.id))
         )
         val (request, response, result) = Fuel.post("https://app02.bazl.admin.ch/web/bazl-backend/lfr")
             .jsonBody(requestBody)
-            .responseObject<JsonArray>(json = json)
+            .responseString()
+        return result.get()
+    }
 
-        val records: List<RegistryRecord> = result.get().map {
-            json.decodeFromJsonElement(RegistryRecord.serializer(), it)
-        }
-        check(records.isNotEmpty()) { "No result for ${registrationId.id}" }
-        check(records.size == 1) { "More than one result for ${registrationId.id}" }
+    private fun loadJsonRecordFromDisk(registrationId: RegistrationId): String {
+        val basePath = "${System.getProperty("user.home")}/tailnumber-data/ch/json"
+        val filename = "$basePath/${registrationId.id}.json"
+        return File(filename).bufferedReader().use { reader -> reader.readText() }
+    }
 
-        val record = records[0]
-        return toRegistration(record)
+    fun loadJsonFromArchive(): Map<RegistrationId, Registration> {
+        val results: MutableMap<RegistrationId, Registration> = mutableMapOf()
+
+        Files.newInputStream(Paths.get(System.getProperty("user.home"), "tailnumber-data/ch", "json.tar.gz"))
+            .use { fi ->
+                BufferedInputStream(fi).use { bi ->
+                    GzipCompressorInputStream(bi).use { gzi ->
+                        TarArchiveInputStream(gzi).use { i ->
+                            var entryOpt: TarArchiveEntry?
+                            while (i.nextTarEntry.also { entryOpt = it } != null) {
+                                if (!i.canReadEntryData(entryOpt)) {
+                                    logger.error("Can't read entry ${entryOpt?.name}")
+                                    continue
+                                }
+                                entryOpt?.let { entry ->
+                                    if (!entry.isDirectory) {
+                                        if (entry.isFile) {
+                                            val rawId = entry.name.split(".")[0].split("JSON/", ignoreCase = true)[1]
+                                            val registrationId = RegistrationId.fromTailNumber(rawId)
+                                            val registration =
+                                                fetchRegistration(registrationId, input = String(i.readBytes()))
+                                            results[registrationId] = registration
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        return results
     }
 
     private fun toRegistration(record: RegistryRecord): Registration {
@@ -116,7 +179,11 @@ class ChRegistrationEnhancer {
             Address(
                 street1 = addr.extraLine ?: streetWithHouseNumber,
                 street2 = if (addr.extraLine != null) streetWithHouseNumber else null,
-                poBox = addr.poBoxName?.let { poBoxName -> "$poBoxName ${addr.poBox!!}" },
+                poBox = addr.poBoxName?.let { poBoxName ->
+                    addr.poBox?.let { poBox ->
+                        "$poBoxName $poBox"
+                    } ?: poBoxName
+                },
                 city = addr.city,
                 zipCode = addr.zipCode,
                 country = addr.country
@@ -160,6 +227,10 @@ class ChRegistrationEnhancer {
 
 fun main() {
     val enhancer = ChRegistrationEnhancer()
-    val reg = enhancer.fetchRegistration(RegistrationId("HB-CQR", Country.CH))
-    println(reg)
+    val registrationId = RegistrationId("HB-336", Country.CH)
+//    val reg = enhancer.fetchRegistration(registrationId)
+//    println(reg)
+//    enhancer.writeToFile(registrationId)
+    val map = enhancer.loadJsonFromArchive()
+    println(map[registrationId])
 }
