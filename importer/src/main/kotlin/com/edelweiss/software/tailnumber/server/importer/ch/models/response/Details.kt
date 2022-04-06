@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 @Serializable
 internal data class Details(
-    val marketing: String?,
+    @Serializable(with = NAStringSerializer::class) val marketing: String?,
     val certificationBasis: String?,
     val airworthinessCat: List<String>?,
     val ela: String?,

@@ -11,7 +11,7 @@ import com.edelweiss.software.tailnumber.server.core.registration.Registration
 import com.edelweiss.software.tailnumber.server.core.registration.RegistrationId
 import com.edelweiss.software.tailnumber.server.core.serializers.CoreSerialization
 import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
-import com.edelweiss.software.tailnumber.server.importer.ch.ChRegistrationSummaryImporter
+import com.edelweiss.software.tailnumber.server.importer.ch.ChFullRegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.faa.FaaRegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.zipcodes.ZipCodeRepository
 import kotlinx.serialization.encodeToString
@@ -142,16 +142,18 @@ fun main(args: Array<String>) {
     require(args.size > 1) { "Usage: CassandraExporter US,CH /home/XYZ/tailnumber-data" }
     val countries = args[0].split(",").map { Country.valueOf(it) }.toSet()
     val faaDataBasePath = args[1] + "/faa/ReleasableAircraft"
-    val chSummaryPath = args[1] + "/ch/pubs.html"
+//    val chSummaryPath = args[1] + "/ch/pubs.html"
+    val jsonTarGzPath = args[1] + "/ch/json.tar.gz"
 
     startKoin {
         modules(module {
             single { ZipCodeRepository() }
             single<RegistrationImporter>(named(Country.US)) { FaaRegistrationImporter(faaDataBasePath) }
-            single<RegistrationImporter>(named(Country.CH)) { ChRegistrationSummaryImporter(chSummaryPath, true) }
+//            single<RegistrationImporter>(named(Country.CH)) { ChRegistrationSummaryImporter(chSummaryPath, true) }
+            single<RegistrationImporter>(named(Country.CH)) { ChFullRegistrationImporter(jsonTarGzPath) }
             single { CassandraExporter() }
         })
 
-        koin.get<CassandraExporter>().export()
+        koin.get<CassandraExporter>().export(countries)
     }
 }

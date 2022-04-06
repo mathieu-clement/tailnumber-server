@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-dir=/home/tailnumber/tailnumber-data/ch
+dir=$HOME/tailnumber-data/ch
 mkdir -p "$dir"
 current_date=$(date "+%Y-%m-%d") # date -I doesn't work on Mac
 

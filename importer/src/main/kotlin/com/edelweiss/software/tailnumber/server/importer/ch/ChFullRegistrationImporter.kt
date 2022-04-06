@@ -8,35 +8,37 @@ import com.edelweiss.software.tailnumber.server.core.aircraft.WeightUnit
 import com.edelweiss.software.tailnumber.server.core.engine.EngineReference
 import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationsNotFoundException
 import com.edelweiss.software.tailnumber.server.core.registration.*
+import com.edelweiss.software.tailnumber.server.importer.RegistrationImporter
 import com.edelweiss.software.tailnumber.server.importer.ch.models.ChRegistrationStatus
-import com.edelweiss.software.tailnumber.server.importer.ch.models.request.QueryProperties
-import com.edelweiss.software.tailnumber.server.importer.ch.models.request.RegistryRequest
 import com.edelweiss.software.tailnumber.server.importer.ch.models.response.OwnerOperator
 import com.edelweiss.software.tailnumber.server.importer.ch.models.response.RegistryRecord
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.extensions.jsonBody
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
+import org.koin.core.component.KoinComponent
 import org.slf4j.LoggerFactory
 import java.io.BufferedInputStream
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 
 
-class ChRegistrationEnhancer {
+/**
+ * @property json.tar.gz file, generated from download-all-json.sh script
+ */
+class ChFullRegistrationImporter(val jsonTarGzPath: String) : RegistrationImporter, KoinComponent {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val json = Json {
         ignoreUnknownKeys = true
-        isLenient = true
+        isLenient = true // allows parsing strings as Int for example
     }
 
-    fun fetchRegistration(registrationId: RegistrationId, input: String): Registration {
+    private val nameDelimiterPattern = Regex(" *, *")
+
+    internal fun deserializeRegistration(registrationId: RegistrationId, input: String): Registration {
 //        val input = loadJsonRecordFromDisk(registrationId)
         val jsonArray = json.decodeFromString(JsonArray.serializer(), input)
 
@@ -52,6 +54,7 @@ class ChRegistrationEnhancer {
         return toRegistration(record)
     }
 
+    /*
     fun writeToFile(registrationId: RegistrationId) {
         val basePath = "${System.getProperty("user.home")}/tailnumber-data/ch/json"
         val directory = File(basePath)
@@ -79,11 +82,12 @@ class ChRegistrationEnhancer {
         val filename = "$basePath/${registrationId.id}.json"
         return File(filename).bufferedReader().use { reader -> reader.readText() }
     }
+     */
 
     fun loadJsonFromArchive(): Map<RegistrationId, Registration> {
         val results: MutableMap<RegistrationId, Registration> = mutableMapOf()
 
-        Files.newInputStream(Paths.get(System.getProperty("user.home"), "tailnumber-data/ch", "json.tar.gz"))
+        Files.newInputStream(Paths.get(jsonTarGzPath))
             .use { fi ->
                 BufferedInputStream(fi).use { bi ->
                     GzipCompressorInputStream(bi).use { gzi ->
@@ -104,7 +108,7 @@ class ChRegistrationEnhancer {
                                             val str = String(i.readBytes())
                                             try {
                                                 val registration =
-                                                    fetchRegistration(registrationId, input = str)
+                                                    deserializeRegistration(registrationId, input = str)
                                                 results[registrationId] = registration
                                             } catch (rnf: RegistrationsNotFoundException) {
                                                 logger.warn("Registration not found: $registrationId")
@@ -151,7 +155,7 @@ class ChRegistrationEnhancer {
                 engines = numEngines,
                 aircraftCategory = null,
                 seats = null,
-                passengerSeats = record.details?.numCrewPax,
+                passengerSeats = null,
                 weightCategory = null,
                 maxTakeOffMass = record.details?.mtom?.let { Weight(it.toInt(), WeightUnit.KILOGRAMS) },
                 cruisingSpeed = null,
@@ -184,7 +188,7 @@ class ChRegistrationEnhancer {
             ?.let { toStructuredRegistrant(it) }
 
     private fun toStructuredRegistrant(o: OwnerOperator) = Registrant(
-        name = o.ownerOperator,
+        name = o.ownerOperator?.let { swapRegistrantName(it) },
         address = o.address?.let { addr ->
             val streetWithHouseNumber = addr.street?.let { street ->
                 if (addr.streetNo != null) "$street ${addr.streetNo}" else street
@@ -203,6 +207,19 @@ class ChRegistrationEnhancer {
             )
         }
     )
+
+    /**
+     * Changes "Last, First" to "First Last" (names).
+     * If there is no comma in the input, or more than one, the input is left unchanged.
+     * Space before or after the comma is ignored
+     */
+    internal fun swapRegistrantName(name: String) : String {
+        val parts = name.split(nameDelimiterPattern)
+        return when (parts.size) {
+            2 -> "${parts[1]} ${parts[0]}"
+            else -> name
+        }
+    }
 
     private fun toAircraftType(text: String, engines: Int): AircraftType? = when (text) {
         "Aeroplane", "Homebuilt Airplane" -> if (engines > 1)
@@ -236,10 +253,13 @@ class ChRegistrationEnhancer {
             null
         }
     }
+
+    override fun import(): List<Registration> = loadJsonFromArchive().values.toList()
 }
 
 fun main() {
-    val enhancer = ChRegistrationEnhancer()
+    val tarGzPath = "${System.getProperty("user.home")}/tailnumber-data/ch/json.tar.gz"
+    val enhancer = ChFullRegistrationImporter(tarGzPath)
     val registrationId = RegistrationId("HB-336", Country.CH)
 //    val reg = enhancer.fetchRegistration(registrationId)
 //    println(reg)
