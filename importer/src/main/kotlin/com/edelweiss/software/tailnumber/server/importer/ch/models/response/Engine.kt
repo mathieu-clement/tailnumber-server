@@ -5,9 +5,8 @@ import java.time.LocalDateTime
 
 @Serializable
 internal data class Engine(
-    val engineManufacturer: String?,
-    val name: String?,
-    val count: Int?,
-    @Serializable(with = NAorLocalDateTimeSerializer::class)
-    val manEndDate: LocalDateTime?
+    @Serializable(with = NAStringSerializer::class) val engineManufacturer: String?,
+    @Serializable(with = NAStringSerializer::class) val name: String?,
+    @Serializable(with = NAIntSerializer::class) val count: Int?,
+    @Serializable(with = NAorLocalDateTimeSerializer::class) val manEndDate: LocalDateTime?
 )

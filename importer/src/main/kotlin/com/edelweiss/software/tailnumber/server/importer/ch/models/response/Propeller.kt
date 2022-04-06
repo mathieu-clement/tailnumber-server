@@ -7,9 +7,8 @@ import java.time.LocalDateTime
 @Serializable
 internal data class Propeller(
     // yep, they made a typo
-    @SerialName("propellerManuafacturer") val propellerManufacturer: String?,
-    val propellerType: String?,
-    val count: Int?,
-    @Serializable(with = NAorLocalDateTimeSerializer::class)
-    val manEndDate: LocalDateTime?
+    @Serializable(with = NAStringSerializer::class) @SerialName("propellerManuafacturer") val propellerManufacturer: String?,
+    @Serializable(with = NAStringSerializer::class) val propellerType: String?,
+    @Serializable(with = NAIntSerializer::class) val count: Int?,
+    @Serializable(with = NAorLocalDateTimeSerializer::class) val manEndDate: LocalDateTime?
 )
