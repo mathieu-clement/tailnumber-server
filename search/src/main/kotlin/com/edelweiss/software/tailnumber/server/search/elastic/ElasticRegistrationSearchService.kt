@@ -68,7 +68,8 @@ class ElasticRegistrationSearchService : KoinComponent {
 
     private val exactRegistrantNameOrAddressSearchFields = listOf(
         "registrant.name.raw",
-        "owner.raw", "operator.raw"
+        "owner.name.raw",
+        "operator.name.raw"
     )
 
     init {
