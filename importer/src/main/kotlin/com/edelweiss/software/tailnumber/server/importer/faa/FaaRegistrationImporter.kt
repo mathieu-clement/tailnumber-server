@@ -152,9 +152,13 @@ class FaaRegistrationImporter(
         country: String?
     ): Address? {
         if (street == null && street2 == null && city == null && zipCode == null && country == null) return null
-        return Address(street, street2, city, fetchStateIfNull(state, zipCode),
-            if (country == "US") parseUsZipCode(zipCode) else zipCode,
-            country)
+        return Address(
+            street1 = street,
+            street2 = street2,
+            city = city,
+            state = fetchStateIfNull(state, zipCode),
+            zipCode =  if (country == "US") parseUsZipCode(zipCode) else zipCode,
+            country = country)
     }
 
     private fun fetchStateIfNull(state: String?, zipCode: String?): String? = when {
