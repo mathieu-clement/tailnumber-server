@@ -1,8 +1,7 @@
 #!/bin/sh
 
-base=$HOME/tailnumber-data/ch
+scriptdir=$(dirname $0)
+base=$HOME/tailnumber-data/ch2
+parallel_connections=4
 
-for reg in $($base/extract-tailnumbers.sh | xargs); do
-    echo $reg
-    $base/fetch-json-for-tailnumber.sh $reg
-done
+$scriptdir/extract-tailnumbers.sh | xargs -L 1 -n 1 -P $parallel_connections $scriptdir/fetch-json-for-tailnumber.sh
