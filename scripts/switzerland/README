@@ -3,4 +3,5 @@
 3. pdf-to-html.sh   -> Good for registration summary importer
 4. download-all-json.sh
 5. create-json_tar_gz.sh -> Good for full registration importer
+6. Check for any empty files: check-empty-files.sh, and run fetch-json-for-tailnumber.sh for all of them
 
