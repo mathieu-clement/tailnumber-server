@@ -128,6 +128,7 @@ class ElasticRegistrationSearchService : KoinComponent {
                     ),
                     manufacturer = fields.aircraftReferenceManufacturer,
                     model = fields.aircraftReferenceModel,
+                    year = fields.aircraftReferenceManufactureYear,
                     operator = fields.operatorName?.let { Registrant(it, null) },
                     owner = fields.ownerName?.let { Registrant(it, null) },
                     registrant = fields.registrantName?.let { Registrant(it, null) },
@@ -206,10 +207,10 @@ class ElasticRegistrationSearchService : KoinComponent {
         return searchResult.hits.hits.mapNotNull { hit ->
             hit.fields?.let { fields ->
                 PartialRegistration(
-                    RegistrationId(fields.registrationIdId, Country.valueOf(fields.registrationIdCountry)),
-                    fields.aircraftReferenceManufacturer,
-                    fields.aircraftReferenceModel,
-                    fields.aircraftReferenceManufactureYear,
+                    registrationId = RegistrationId(fields.registrationIdId, Country.valueOf(fields.registrationIdCountry)),
+                    manufacturer = fields.aircraftReferenceManufacturer,
+                    model = fields.aircraftReferenceModel,
+                    year = fields.aircraftReferenceManufactureYear,
                     registrant = fields.registrantName?.let { registrantName ->
                         Registrant(
                             registrantName,
