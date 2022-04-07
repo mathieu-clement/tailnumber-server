@@ -56,7 +56,7 @@ class CassandraExporter : KoinComponent {
             )
 
             val counter = AtomicInteger(0)
-            val startTime = System.currentTimeMillis()
+            val startTimeNanos = System.nanoTime()
 
             val registrations: MutableList<Registration> = mutableListOf()
             if (Country.CH in countries) {
@@ -93,7 +93,7 @@ class CassandraExporter : KoinComponent {
                     val batch = batchBuilder.build()
                     session.execute(batch)
 
-                    printProgress(startTime, counter.incrementAndGet(), numRegistrations)
+                    printProgress(startTimeNanos, counter.incrementAndGet(), numRegistrations)
                 }
             }
             println("Export finished in ${TimeUnit.MILLISECONDS.toMinutes(timeMs)} min")
@@ -119,15 +119,15 @@ class CassandraExporter : KoinComponent {
         }.toSet()
     }
 
-    private fun printProgress(startTime: Long, counter: Int, numRegistrations: Int) {
+    private fun printProgress(startTimeNanos: Long, counter: Int, numRegistrations: Int) {
         if (counter % 100 != 0) return
-        val currentTime = System.currentTimeMillis()
-        val averageMillisPerUpsert = (currentTime - startTime) / counter
+        val currentTimeNanos = System.nanoTime()
+        val averageMillisPerUpsert = (currentTimeNanos - startTimeNanos) / 1e6 / counter
         val remainingUpserts = numRegistrations - counter
         val remainingTimeMillis = remainingUpserts * averageMillisPerUpsert
-        val remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(remainingTimeMillis)
+        val remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(remainingTimeMillis.toLong())
         val remainingSeconds =
-            TimeUnit.MILLISECONDS.toSeconds(remainingTimeMillis) - TimeUnit.MINUTES.toSeconds(remainingMinutes)
+            TimeUnit.MILLISECONDS.toSeconds(remainingTimeMillis.toLong()) - TimeUnit.MINUTES.toSeconds(remainingMinutes)
         print("\r$counter (${(100 * counter / numRegistrations)} %), $remainingMinutes min $remainingSeconds sec remaining")
     }
 
