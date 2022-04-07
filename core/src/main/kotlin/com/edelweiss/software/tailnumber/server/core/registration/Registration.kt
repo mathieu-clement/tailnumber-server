@@ -1,6 +1,7 @@
 package com.edelweiss.software.tailnumber.server.core.registration
 
 import com.edelweiss.software.tailnumber.server.core.aircraft.AircraftReference
+import com.edelweiss.software.tailnumber.server.core.aircraft.PropellerReference
 import com.edelweiss.software.tailnumber.server.core.airworthiness.Airworthiness
 import com.edelweiss.software.tailnumber.server.core.engine.EngineReference
 import kotlinx.serialization.Contextual
@@ -14,6 +15,7 @@ data class Registration(
     val status: RegistrationStatus? = null,
     val aircraftReference: AircraftReference,
     val engineReferences: List<EngineReference> = emptyList(),
+    val propellerReferences: List<PropellerReference> = emptyList(), // CH registry
     val registrantType: RegistrantType? = null,
     val registrant: Registrant? = null, // US registry
     val owner: Registrant? = null, // CH registry

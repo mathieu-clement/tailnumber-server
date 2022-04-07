@@ -10,7 +10,6 @@ data class AircraftReference(
     val aircraftCategory: AircraftCategory? = null,
     val manufacturer: String? = null,
     val model: String? = null,
-    val marketingDesignation: String? = null,
     val icaoType: String? = null,
     val serialNumber: String? = null,
     val typeCertificated: Boolean? = true,
@@ -25,5 +24,18 @@ data class AircraftReference(
     val kitManufacturerName: String? = null,
     val kitModelName: String? = null,
     @Contextual
-    val transponderCode: TransponderCode? = null
+    val transponderCode: TransponderCode? = null,
+    /**
+     * Missing fields from CH registry:
+     * - airworthinessCat
+     * - ela
+     * - noiseStandard
+     * - tcds (Type Certificate Data Sheet)
+     */
+    val marketingDesignation: String? = null,
+    val certificationBasis: String? = null,
+    val minCrew: Int? = null,
+    val noiseClass: String? = null,
+    val noiseLevel: Double? = null, // db(A)
+    val legalBasis: String? = null
 )

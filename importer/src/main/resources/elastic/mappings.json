@@ -46,7 +46,8 @@
           "manufacturer": {
             "type": "text",
             "index": true,
-            "fields":  {
+            "store": true,
+            "fields": {
               "raw": {
                 "type": "keyword"
               }
@@ -67,7 +68,8 @@
           "model": {
             "type": "text",
             "index": true,
-            "fields":  {
+            "store": true,
+            "fields": {
               "raw": {
                 "type": "keyword"
               }
@@ -90,6 +92,30 @@
             "index": true
           },
           "weightCategory": {
+            "type": "keyword",
+            "index": false
+          },
+          "marketingDesignation": {
+            "type": "text",
+            "index": false
+          },
+          "certificationBasis": {
+            "type": "text",
+            "index": false
+          },
+          "minCrew": {
+            "type": "integer",
+            "index": false
+          },
+          "noiseClass": {
+            "type": "keyword",
+            "index": false
+          },
+          "noiseLevel": {
+            "type": "double",
+            "index": false
+          },
+          "legalBasis": {
             "type": "keyword",
             "index": false
           }
@@ -181,6 +207,32 @@
           }
         }
       },
+      "propellerReferences": {
+        "properties": {
+          "count": {
+            "type": "byte",
+            "index": false
+          },
+          "manufacturer": {
+            "type": "text",
+            "index": true,
+            "fields":  {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          },
+          "model": {
+            "type": "text",
+            "index": true,
+            "fields":  {
+              "raw": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
       "expirationDate": {
         "type": "date",
         "index": false
@@ -209,8 +261,12 @@
                 "type": "keyword",
                 "index": false
               },
+              "poBoxName": {
+                "type": "keyword",
+                "index": false
+              },
               "poBox": {
-                "type": "poBox",
+                "type": "short",
                 "index": false
               },
               "state": {
@@ -261,8 +317,12 @@
                 "type": "keyword",
                 "index": false
               },
+              "poBoxName": {
+                "type": "keyword",
+                "index": false
+              },
               "poBox": {
-                "type": "poBox",
+                "type": "short",
                 "index": false
               },
               "state": {
@@ -313,8 +373,12 @@
                 "type": "keyword",
                 "index": false
               },
+              "poBoxName": {
+                "type": "keyword",
+                "index": false
+              },
               "poBox": {
-                "type": "poBox",
+                "type": "short",
                 "index": false
               },
               "state": {

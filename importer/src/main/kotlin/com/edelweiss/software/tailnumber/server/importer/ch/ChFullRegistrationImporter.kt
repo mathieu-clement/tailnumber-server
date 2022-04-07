@@ -1,10 +1,7 @@
 package com.edelweiss.software.tailnumber.server.importer.ch
 
 import com.edelweiss.software.tailnumber.server.core.Country
-import com.edelweiss.software.tailnumber.server.core.aircraft.AircraftReference
-import com.edelweiss.software.tailnumber.server.core.aircraft.AircraftType
-import com.edelweiss.software.tailnumber.server.core.aircraft.Weight
-import com.edelweiss.software.tailnumber.server.core.aircraft.WeightUnit
+import com.edelweiss.software.tailnumber.server.core.aircraft.*
 import com.edelweiss.software.tailnumber.server.core.engine.EngineReference
 import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationsNotFoundException
 import com.edelweiss.software.tailnumber.server.core.registration.*
@@ -27,7 +24,8 @@ import java.nio.file.Paths
 /**
  * @property json.tar.gz file, generated from download-all-json.sh script
  */
-class ChFullRegistrationImporter(val jsonTarGzPath: String) : RegistrationImporter, KoinComponent {
+class ChFullRegistrationImporter(private val jsonTarGzPath: String, private val isExternalFile: Boolean = true) :
+    RegistrationImporter, KoinComponent {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -37,6 +35,7 @@ class ChFullRegistrationImporter(val jsonTarGzPath: String) : RegistrationImport
     }
 
     private val nameDelimiterPattern = Regex(" *, *")
+    private val noiseLevelPattern = Regex("[0-9]+(\\.[0-9]+)?")
 
     internal fun deserializeRegistration(registrationId: RegistrationId, input: String): Registration {
 //        val input = loadJsonRecordFromDisk(registrationId)
@@ -87,34 +86,32 @@ class ChFullRegistrationImporter(val jsonTarGzPath: String) : RegistrationImport
     fun loadJsonFromArchive(): Map<RegistrationId, Registration> {
         val results: MutableMap<RegistrationId, Registration> = mutableMapOf()
 
-        Files.newInputStream(Paths.get(jsonTarGzPath))
-            .use { fi ->
-                BufferedInputStream(fi).use { bi ->
-                    GzipCompressorInputStream(bi).use { gzi ->
-                        TarArchiveInputStream(gzi).use { i ->
-                            var entryOpt: TarArchiveEntry?
-                            while (i.nextTarEntry.also { entryOpt = it } != null) {
-                                if (!i.canReadEntryData(entryOpt)) {
-                                    logger.error("Can't read entry ${entryOpt?.name}")
-                                    continue
-                                }
-                                entryOpt?.let { entry ->
-                                    if (!entry.isDirectory) {
-                                        if (entry.isFile) {
-                                            // Entry will have a name such as "JSON/HB-123.json"
-                                            // so we try to find the part after the slash and between the dot
-                                            val rawId = entry.name.split(".")[0].split("/", ignoreCase = true)[1]
-                                            val registrationId = RegistrationId.fromTailNumber(rawId)
-                                            val str = String(i.readBytes())
-                                            try {
-                                                val registration =
-                                                    deserializeRegistration(registrationId, input = str)
-                                                results[registrationId] = registration
-                                            } catch (rnf: RegistrationsNotFoundException) {
-                                                logger.warn("Registration not found: $registrationId")
-                                            } catch (t: Throwable) {
-                                                logger.error("Error processing $registrationId: ${t.message}", t)
-                                            }
+        jsonTarGzInputStream().use { fi ->
+            BufferedInputStream(fi).use { bi ->
+                GzipCompressorInputStream(bi).use { gzi ->
+                    TarArchiveInputStream(gzi).use { i ->
+                        var entryOpt: TarArchiveEntry?
+                        while (i.nextTarEntry.also { entryOpt = it } != null) {
+                            if (!i.canReadEntryData(entryOpt)) {
+                                logger.error("Can't read entry ${entryOpt?.name}")
+                                continue
+                            }
+                            entryOpt?.let { entry ->
+                                if (!entry.isDirectory) {
+                                    if (entry.isFile) {
+                                        // Entry will have a name such as "JSON/HB-123.json"
+                                        // so we try to find the part after the slash and between the dot
+                                        val rawId = entry.name.split(".")[0].split("/", ignoreCase = true)[1]
+                                        val registrationId = RegistrationId.fromTailNumber(rawId)
+                                        val str = String(i.readBytes())
+                                        try {
+                                            val registration =
+                                                deserializeRegistration(registrationId, input = str)
+                                            results[registrationId] = registration
+                                        } catch (rnf: RegistrationsNotFoundException) {
+                                            logger.warn("Registration not found: $registrationId")
+                                        } catch (t: Throwable) {
+                                            logger.error("Error processing $registrationId: ${t.message}", t)
                                         }
                                     }
                                 }
@@ -123,8 +120,15 @@ class ChFullRegistrationImporter(val jsonTarGzPath: String) : RegistrationImport
                     }
                 }
             }
+        }
 
         return results
+    }
+
+    private fun jsonTarGzInputStream() = if (isExternalFile) {
+        Files.newInputStream(Paths.get(jsonTarGzPath))
+    } else {
+        Thread.currentThread().contextClassLoader.getResourceAsStream(jsonTarGzPath)!!
     }
 
     private fun toRegistration(record: RegistryRecord): Registration {
@@ -147,29 +151,38 @@ class ChFullRegistrationImporter(val jsonTarGzPath: String) : RegistrationImport
                 marketingDesignation = record.details?.marketing,
                 icaoType = record.icaoCode,
                 serialNumber = record.details?.serialNumber,
-                typeCertificated = when {
-                    aircraftCategoryTranslation == null -> null
-                    aircraftCategoryTranslation.contains("Homebuil") -> false
-                    else -> true
-                },
+                typeCertificated = aircraftCategoryTranslation?.let { !it.contains("Homebuil" /* no final "t" or "d" */) },
                 engines = numEngines,
                 aircraftCategory = null,
                 seats = null,
-                passengerSeats = null,
+                passengerSeats = record.details?.numCrewPax,
+                minCrew = record.details?.minCrew,
                 weightCategory = null,
                 maxTakeOffMass = record.details?.mtom?.let { Weight(it.toInt(), WeightUnit.KILOGRAMS) },
                 cruisingSpeed = null,
                 manufactureYear = record.details?.yearOfManufacture,
                 kitManufacturerName = null,
                 kitModelName = null,
-                transponderCode = record.details?.aircraftAddresses?.oct?.let { TransponderCode.fromOctal(it) }
-            ),
+                transponderCode = record.details?.aircraftAddresses?.oct?.let { TransponderCode.fromOctal(it) },
+                certificationBasis = record.details?.certificationBasis,
+                noiseClass = record.details?.noiseClass,
+                noiseLevel = record.details?.noiseLevel?.let { parseNoiseLevel(it) },
+                legalBasis = record.details?.aircraftLegalBasis,
+
+                ),
             engineReferences = record.details?.engines?.map {
                 EngineReference(
                     count = it.count,
                     engineType = null,
                     manufacturer = it.engineManufacturer,
                     model = it.name
+                )
+            } ?: emptyList(),
+            propellerReferences = record.details?.propellers?.map {
+                PropellerReference(
+                    count = it.count,
+                    manufacturer = it.propellerManufacturer,
+                    model = it.propellerType
                 )
             } ?: emptyList(),
             registrantType = null,
@@ -181,6 +194,9 @@ class ChFullRegistrationImporter(val jsonTarGzPath: String) : RegistrationImport
             // TODO certificationBasis, numCrew, numCrewPax, ela, eltCode, brs, propellers, noiseLevel, noiseStandard, aircraftLegalBasis, tcds
         )
     }
+
+    internal fun parseNoiseLevel(input: String): Double? =
+        noiseLevelPattern.find(input)?.value?.toDouble()
 
     private fun ownerOperatorToStructuredRegistrant(record: RegistryRecord, registrantType: String) =
         record.ownerOperators
@@ -213,7 +229,7 @@ class ChFullRegistrationImporter(val jsonTarGzPath: String) : RegistrationImport
      * If there is no comma in the input, or more than one, the input is left unchanged.
      * Space before or after the comma is ignored
      */
-    internal fun swapRegistrantName(name: String) : String {
+    internal fun swapRegistrantName(name: String): String {
         val parts = name.split(nameDelimiterPattern)
         return when (parts.size) {
             2 -> "${parts[1]} ${parts[0]}"

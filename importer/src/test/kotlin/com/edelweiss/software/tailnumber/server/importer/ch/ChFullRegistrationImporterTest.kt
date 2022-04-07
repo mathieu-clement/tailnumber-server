@@ -1,10 +1,7 @@
 package com.edelweiss.software.tailnumber.server.importer.ch
 
 import com.edelweiss.software.tailnumber.server.core.Country
-import com.edelweiss.software.tailnumber.server.core.aircraft.AircraftReference
-import com.edelweiss.software.tailnumber.server.core.aircraft.AircraftType
-import com.edelweiss.software.tailnumber.server.core.aircraft.Weight
-import com.edelweiss.software.tailnumber.server.core.aircraft.WeightUnit
+import com.edelweiss.software.tailnumber.server.core.aircraft.*
 import com.edelweiss.software.tailnumber.server.core.engine.EngineReference
 import com.edelweiss.software.tailnumber.server.core.registration.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,7 +10,12 @@ import java.time.LocalDate
 
 internal class ChFullRegistrationImporterTest {
 
-    private val importer = ChFullRegistrationImporter("" /* unused in this test */)
+    private val importer = ChFullRegistrationImporter("json.tar.gz", false)
+
+    @Test
+    fun import() {
+        importer.import()
+    }
 
     @Test
     fun fetchRegistration() {
@@ -43,13 +45,26 @@ internal class ChFullRegistrationImporterTest {
                 maxTakeOffMass = Weight(472, WeightUnit.KILOGRAMS),
                 engines = 1,
                 transponderCode = TransponderCode.fromOctal("22654061"),
-                aircraftType = AircraftType.ECOLIGHT
+                aircraftType = AircraftType.ECOLIGHT,
+                passengerSeats = 1,
+                minCrew = 1,
+                noiseClass = "D",
+                noiseLevel = 61.2,
+                legalBasis = "Non-EASA",
+                certificationBasis = "LTF-UL & FOCA additional requirements"
             ),
             engineReferences = listOf(
                 EngineReference(
                     count = 1,
                     manufacturer = "BRP-ROTAX GMBH & CO KG",
                     model = "ROTAX 912 UL"
+                )
+            ),
+            propellerReferences = listOf(
+                PropellerReference(
+                    count = 1,
+                    manufacturer = "PIPISTREL D.O.O.",
+                    model = "VARIO"
                 )
             ),
             certificateIssueDate = LocalDate.of(2008, 5, 26),
@@ -67,6 +82,12 @@ internal class ChFullRegistrationImporterTest {
         assertEquals("First Last", importer.swapRegistrantName("Last ,First"))
         assertEquals("Last, First, Second", importer.swapRegistrantName("Last, First, Second"))
         assertEquals("", importer.swapRegistrantName(""))
+    }
+
+    @Test
+    fun noiseLevel() {
+        assertEquals(84.4, importer.parseNoiseLevel("SEL: 84.4"))
+        assertEquals(91.3, importer.parseNoiseLevel("91.3 dB(A)"))
     }
 
     private fun readFileAsString(filename: String): String {
