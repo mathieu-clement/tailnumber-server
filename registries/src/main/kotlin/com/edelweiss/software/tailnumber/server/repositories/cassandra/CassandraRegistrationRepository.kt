@@ -33,6 +33,7 @@ class CassandraRegistrationRepository : RegistrationRepository {
         getSession().let { session ->
             val select = QueryBuilder.selectFrom("registrations")
                 .column("record")
+                .column("lastUpdate")
                 .whereColumn("id").`in`(registrationIds.map { literal(it.id) })
                 .build()
             val resultSet = session.execute(select)

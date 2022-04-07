@@ -1,7 +1,9 @@
 CREATE KEYSPACE IF NOT EXISTS tailnumber
 WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : '1' };
 
-CREATE TABLE IF NOT EXISTS tailnumber.registrations (
+DROP TABLE tailnumber.registrations;
+
+CREATE TABLE tailnumber.registrations (
 	id text PRIMARY KEY,
 	country text,
 	lastUpdate date,
