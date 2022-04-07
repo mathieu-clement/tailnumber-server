@@ -107,6 +107,7 @@ class ElasticRegistrationSearchService : KoinComponent {
             fields = setOf("registrationId.id", "registrationId.country",
                 "aircraftReference.manufacturer",
                 "aircraftReference.model",
+                "aircraftReference.manufactureYear",
                 "registrant.name",
                 "operator"
             ),
