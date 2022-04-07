@@ -258,15 +258,11 @@
                 "index": true
               },
               "country": {
-                "type": "keyword",
-                "index": false
-              },
-              "poBoxName": {
-                "type": "keyword",
+                "type": "text",
                 "index": false
               },
               "poBox": {
-                "type": "short",
+                "type": "text",
                 "index": false
               },
               "state": {
@@ -314,15 +310,11 @@
                 "index": true
               },
               "country": {
-                "type": "keyword",
-                "index": false
-              },
-              "poBoxName": {
-                "type": "keyword",
+                "type": "text",
                 "index": false
               },
               "poBox": {
-                "type": "short",
+                "type": "text",
                 "index": false
               },
               "state": {
@@ -370,15 +362,11 @@
                 "index": true
               },
               "country": {
-                "type": "keyword",
-                "index": false
-              },
-              "poBoxName": {
-                "type": "keyword",
+                "type": "text",
                 "index": false
               },
               "poBox": {
-                "type": "short",
+                "type": "text",
                 "index": false
               },
               "state": {
