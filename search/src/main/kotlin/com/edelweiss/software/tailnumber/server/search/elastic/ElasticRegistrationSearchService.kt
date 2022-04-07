@@ -79,7 +79,7 @@ class ElasticRegistrationSearchService : KoinComponent {
      * Returns true if there is a record matching the registration
      */
     fun exists(tailNumber: RegistrationId): Boolean {
-        val (request, response, result) = Fuel.get("$baseUrl/_doc/${tailNumber.id}")
+        val (_, response, _) = Fuel.get("$baseUrl/_doc/${tailNumber.id}")
             .timeout(requestTimeoutMs)
             .timeoutRead(requestTimeoutMs)
             .response()
@@ -112,7 +112,7 @@ class ElasticRegistrationSearchService : KoinComponent {
             size = 20
         )
         val searchDocJson = json.encodeToString(searchDoc)
-        val (request, response, result) = Fuel.post("$baseUrl/_search")
+        val (_, _, result) = Fuel.post("$baseUrl/_search")
             .jsonBody(searchDocJson)
             .configure()
             .responseObject<SearchResponse>(json = json)
@@ -159,7 +159,7 @@ class ElasticRegistrationSearchService : KoinComponent {
         )
 
         val searchDocJson = json.encodeToString(searchDoc)
-        val (request, response, result) = Fuel.post("$baseUrl/_search")
+        val (_, _, result) = Fuel.post("$baseUrl/_search")
             .jsonBody(searchDocJson)
             .configure()
             .responseObject<SearchResponse>(json = json)
@@ -196,7 +196,7 @@ class ElasticRegistrationSearchService : KoinComponent {
             size = 50
         )
         val searchDocJson = json.encodeToString(searchDoc)
-        val (request, response, result) = Fuel.post("$baseUrl/_search")
+        val (_, _, result) = Fuel.post("$baseUrl/_search")
             .jsonBody(searchDocJson)
             .configure()
             .responseObject<SearchResponse>(json = json)
@@ -273,11 +273,16 @@ class ElasticRegistrationSearchService : KoinComponent {
         logger.debug("Inserting document $upsertJson")
         val path = "$baseUrl/_update/${registration.registrationId.id}"
         logger.debug("Path: $path")
-        val (_, response, result) = Fuel.post(path)
-            .jsonBody(upsertJson)
-            .configure()
-            .responseString()
-        check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}. Maybe the user/password or CA cert is wrong?. Response: ${result.get()}" }
+        try {
+            val (_, response, result) = Fuel.post(path)
+                .jsonBody(upsertJson)
+                .configure()
+                .responseString()
+            check(response.statusCode in 200 until 300) { "Status code was ${response.statusCode}. Maybe the user/password or CA cert is wrong?. Response: ${result.get()}" }
+        } catch (t: Throwable) {
+            logger.error("Failed to upsert ${registration.registrationId.id}: $upsertJson")
+            throw t
+        }
     }
 
     private fun configureKeystore() {
