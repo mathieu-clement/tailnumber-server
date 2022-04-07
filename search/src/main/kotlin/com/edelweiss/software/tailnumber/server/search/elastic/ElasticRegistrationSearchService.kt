@@ -194,7 +194,7 @@ class ElasticRegistrationSearchService : KoinComponent {
                 )
             ),
             fields = partialRegistrationFields,
-            size = 50
+            size = 30
         )
         val searchDocJson = json.encodeToString(searchDoc)
         val (_, _, result) = Fuel.post("$baseUrl/_search")
