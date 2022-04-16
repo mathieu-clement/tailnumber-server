@@ -2,6 +2,7 @@ package com.edelweiss.software.tailnumber.server.importer.ch
 
 import com.edelweiss.software.tailnumber.server.core.Country
 import com.edelweiss.software.tailnumber.server.core.aircraft.*
+import com.edelweiss.software.tailnumber.server.core.airworthiness.Airworthiness
 import com.edelweiss.software.tailnumber.server.core.engine.EngineReference
 import com.edelweiss.software.tailnumber.server.core.exceptions.RegistrationsNotFoundException
 import com.edelweiss.software.tailnumber.server.core.registration.*
@@ -168,7 +169,6 @@ class ChFullRegistrationImporter(private val jsonTarGzPath: String, private val 
                 noiseClass = record.details?.noiseClass,
                 noiseLevel = record.details?.noiseLevel?.let { parseNoiseLevel(it) },
                 legalBasis = record.details?.aircraftLegalBasis,
-
                 ),
             engineReferences = record.details?.engines?.map {
                 EngineReference(
@@ -188,10 +188,7 @@ class ChFullRegistrationImporter(private val jsonTarGzPath: String, private val 
             registrantType = null,
             owner = ownerOperatorToStructuredRegistrant(record, "Main Owner"),
             operator = ownerOperatorToStructuredRegistrant(record, "Main Operator"),
-            certificateIssueDate = record.details?.regDate
-            // TODO deregDate
-            // TODO record.details?.airworthinessCat
-            // TODO certificationBasis, numCrew, numCrewPax, ela, eltCode, brs, propellers, noiseLevel, noiseStandard, aircraftLegalBasis, tcds
+            airworthiness = record.details?.regDate?.let { Airworthiness(airworthinessDate = it) }
         )
     }
 

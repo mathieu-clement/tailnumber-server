@@ -6,8 +6,8 @@ import java.time.LocalDate
 
 @Serializable
 data class Airworthiness(
-    val certificateClass: AirworthinessCertificateClass?,
-    val approvedOperation: List<AirworthinessOperation>,
+    val certificateClass: AirworthinessCertificateClass? = null,
+    val approvedOperation: List<AirworthinessOperation> = emptyList(),
     @Contextual
     val airworthinessDate: LocalDate?
 )
