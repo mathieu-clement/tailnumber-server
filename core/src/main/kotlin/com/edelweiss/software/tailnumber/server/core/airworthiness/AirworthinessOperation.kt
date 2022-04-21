@@ -2,7 +2,6 @@ package com.edelweiss.software.tailnumber.server.core.airworthiness
 
 import com.edelweiss.software.tailnumber.server.core.airworthiness.AirworthinessCertificateClass.*
 
-//@kotlinx.serialization.Serializable(with = AirworthinessOperationSerializer::class)
 interface AirworthinessOperation {
     // Members are same as enum
     val name: String
